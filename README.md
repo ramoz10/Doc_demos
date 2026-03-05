@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Landing Pages Platform
 
-## Getting Started
+Plataforma multi-cliente para gestionar landing pages personalizables. Cada cliente tiene su propia landing con branding, colores, logos y URL del bot configurables desde el backoffice.
 
-First, run the development server:
+## Stack
+
+- Next.js 16 (App Router)
+- Tailwind CSS
+- Shadcn/ui (backoffice)
+- Drizzle ORM + SQLite
+- UploadThing (logos, favicons)
+- Framer Motion
+- React Hook Form + Zod
+
+## Setup
+
+### 1. Instalar dependencias
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Configurar variables de entorno
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Copiar `.env.example` a `.env` y completar:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+cp .env.example .env
+```
 
-## Learn More
+- **UPLOADTHING_TOKEN**: Obtener en [uploadthing.com](https://uploadthing.com). Crear una app y copiar el token.
+- **ADMIN_USER**: Usuario para el backoffice (ej: `admin`)
+- **ADMIN_PASSWORD_HASH**: Hash bcrypt de la contraseña. Generar con:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run admin:hash -- "tu-contraseña-segura"
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+(Copia el hash que se imprime y pégalo en .env después del `=`)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 3. Inicializar base de datos
 
-## Deploy on Vercel
+```bash
+npm run db:push
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 4. Ejecutar en desarrollo
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Opción simple (script start/stop):**
+```bash
+npm run platform:start   # Inicia la plataforma
+npm run platform:stop    # Detiene todo (no deja procesos colgados)
+npm run platform:status  # Ver estado
+npm run platform:restart # Reiniciar
+```
+
+**O manualmente:**
+```bash
+npm run dev
+```
+
+- App: http://localhost:3000
+- Backoffice: http://localhost:3000/admin
+- Landing Home Depot: http://localhost:3000/homedepot (ejecutar `npm run db:seed-homedepot` para crearla)
+
+## Estructura de rutas
+
+| Ruta | Descripción |
+|------|-------------|
+| `/` | Página principal con lista de landings |
+| `/admin` | Login del backoffice |
+| `/admin/dashboard` | Lista de clientes |
+| `/admin/clients/new` | Crear cliente |
+| `/admin/clients/[id]` | Editar branding, theme y contenido |
+| `/[clientSlug]` | Landing pública del cliente |
+
+## Flujo de uso
+
+1. Iniciar sesión en `/admin` con las credenciales configuradas.
+2. Crear un cliente desde el dashboard (nombre + slug).
+3. Editar el cliente: subir logo, favicon, configurar colores, título, subtítulo y URL del bot.
+4. La landing estará disponible en `/{slug}` (ej: `/homedepot`).

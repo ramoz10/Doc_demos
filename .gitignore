@@ -20,9 +20,15 @@
 # production
 /build
 
+# platform script PID
+.platform.pid
+
 # misc
 .DS_Store
 *.pem
+
+# base de datos local
+/data
 
 # debug
 npm-debug.log*
