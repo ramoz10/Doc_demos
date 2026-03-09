@@ -18,7 +18,9 @@
     "db:push": "npx drizzle-kit push",
     "db:seed": "npx tsx scripts/seed.ts",
     "db:seed-homedepot": "npx tsx scripts/seed-homedepot.ts",
-    "db:seed-delsol": "npx tsx scripts/seed-delsol.ts"
+    "db:seed-delsol": "npx tsx scripts/seed-delsol.ts",
+    "db:seed-metlife-seguros": "npx tsx scripts/seed-metlife-seguros.ts",
+    "db:migrate-landing-templates": "npx tsx scripts/migrate-landing-templates.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

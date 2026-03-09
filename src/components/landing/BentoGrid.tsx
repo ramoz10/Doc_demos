@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import type { BentoMinimalContent } from "@/types/landing-templates";
 
 interface BentoCardProps {
   title: string;
@@ -47,31 +48,17 @@ function BentoCard({
 }
 
 interface BentoGridProps {
+  content: BentoMinimalContent;
   primaryColor: string;
   secondaryColor: string;
 }
 
-export function BentoGrid({ primaryColor, secondaryColor }: BentoGridProps) {
-  const cards = [
-    {
-      title: "Inicia una conversación",
-      description:
-        "Haz clic en el botón para abrir el chat con tu agente. El bot está disponible 24/7 para asistirte.",
-      icon: "💬",
-    },
-    {
-      title: "Pregunta lo que necesites",
-      description:
-        "El agente comprende lenguaje natural. Formula tus preguntas de forma clara y obtendrás respuestas útiles.",
-      icon: "❓",
-    },
-    {
-      title: "Sigue las guías",
-      description:
-        "Consulta las guías para conocer las capacidades del bot y cómo sacarle el máximo provecho.",
-      icon: "📚",
-    },
-  ];
+export function BentoGrid({
+  content,
+  primaryColor,
+  secondaryColor,
+}: BentoGridProps) {
+  const cards = content.cards;
 
   return (
     <section

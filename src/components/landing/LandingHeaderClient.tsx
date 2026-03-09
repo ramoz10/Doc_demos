@@ -16,6 +16,9 @@ interface LandingHeaderClientProps {
   secondaryColor: string;
   backgroundColor: string;
   botUrl: string | null;
+  botButtonText: string | null;
+  botUrl2: string | null;
+  botButtonText2: string | null;
 }
 
 export function LandingHeaderClient({
@@ -25,6 +28,9 @@ export function LandingHeaderClient({
   secondaryColor,
   backgroundColor,
   botUrl,
+  botButtonText,
+  botUrl2,
+  botButtonText2,
 }: LandingHeaderClientProps) {
   return (
     <header
@@ -73,24 +79,44 @@ export function LandingHeaderClient({
           ))}
         </div>
 
-        {botUrl ? (
-          <Link
-            href={botUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-lg px-5 py-2.5 text-sm font-semibold uppercase text-white transition-opacity hover:opacity-90"
-            style={{ backgroundColor: primaryColor }}
-          >
-            Ir al Bot
-          </Link>
-        ) : (
-          <span
-            className="rounded-lg px-5 py-2.5 text-sm font-semibold uppercase opacity-60"
-            style={{ backgroundColor: primaryColor, color: backgroundColor }}
-          >
-            Bot (URL no configurada)
-          </span>
-        )}
+        <div className="flex items-center gap-3">
+          {botUrl ? (
+            <Link
+              href={botUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-lg px-5 py-2.5 text-sm font-semibold uppercase text-white transition-opacity hover:opacity-90"
+              style={{ backgroundColor: primaryColor }}
+            >
+              {botButtonText || "Ir al Bot"}
+            </Link>
+          ) : (
+            !botUrl2 && (
+              <span
+                className="rounded-lg px-5 py-2.5 text-sm font-semibold uppercase opacity-60"
+                style={{ backgroundColor: primaryColor, color: backgroundColor }}
+              >
+                {botButtonText || "Bot (No Url)"}
+              </span>
+            )
+          )}
+          
+          {botUrl2 && (
+            <Link
+              href={botUrl2}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-lg px-5 py-2.5 text-sm font-semibold uppercase transition-opacity hover:opacity-90"
+              style={{ 
+                backgroundColor: 'transparent', 
+                color: backgroundColor === '#FFFFFF' || backgroundColor === '#ffffff' ? primaryColor : backgroundColor,
+                border: `2px solid ${primaryColor}` 
+              }}
+            >
+              {botButtonText2 || "Segundo Bot"}
+            </Link>
+          )}
+        </div>
       </nav>
     </header>
   );

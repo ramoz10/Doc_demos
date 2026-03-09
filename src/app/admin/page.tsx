@@ -46,32 +46,33 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-950">
-      <div className="w-full max-w-sm space-y-8 rounded-lg border border-zinc-800 bg-zinc-900 p-8">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-surface-variant to-primary/10">
+      <div className="w-full max-w-sm space-y-8 rounded-card p-8 animate-fade-in">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-white">HD Admin Panel</h1>
-          <p className="mt-2 text-sm text-zinc-400">
+          <h1 className="text-3xl font-bold font-sans tracking-tight text-white mb-2">HD Admin Panel</h1>
+          <p className="text-sm text-zinc-400">
             Inicia sesión para continuar
           </p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {error && (
-            <p className="rounded bg-red-500/20 p-2 text-sm text-red-400">
+            <div className="rounded border border-red-500/50 bg-red-500/10 p-3 text-sm text-red-400">
               {error}
-            </p>
+            </div>
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="username" className="text-zinc-200">
+            <Label htmlFor="username" className="text-zinc-200 font-medium">
               Usuario
             </Label>
             <Input
               id="username"
               type="text"
               {...register("username")}
-              className="border-zinc-700 bg-zinc-800 text-white"
+              className="border-white/10 bg-white/5 text-white placeholder:text-white/30 focus-visible:ring-primary/50 backdrop-blur-sm"
               autoComplete="username"
+              placeholder="Ingresa tu usuario"
             />
             {errors.username && (
               <p className="text-sm text-red-400">{errors.username.message}</p>
@@ -79,15 +80,16 @@ export default function AdminLoginPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-zinc-200">
+            <Label htmlFor="password" className="text-zinc-200 font-medium">
               Contraseña
             </Label>
             <Input
               id="password"
               type="password"
               {...register("password")}
-              className="border-zinc-700 bg-zinc-800 text-white"
+              className="border-white/10 bg-white/5 text-white placeholder:text-white/30 focus-visible:ring-primary/50 backdrop-blur-sm"
               autoComplete="current-password"
+              placeholder="••••••••"
             />
             {errors.password && (
               <p className="text-sm text-red-400">{errors.password.message}</p>
@@ -96,7 +98,7 @@ export default function AdminLoginPage() {
 
           <Button
             type="submit"
-            className="w-full bg-orange-600 hover:bg-orange-700"
+            className="w-full btn-primary"
             disabled={isSubmitting}
           >
             {isSubmitting ? "Entrando..." : "Entrar"}

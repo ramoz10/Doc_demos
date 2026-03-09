@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -19,6 +19,19 @@ import {
 import { UploadButton } from "@/lib/uploadthing";
 import { updateClientBranding, type UpdateBrandingInput } from "@/server/actions/clients";
 import { Trash2 } from "lucide-react";
+import type { TemplateId } from "@/types/landing-templates";
+import {
+  parseLandingContent,
+  getDefaultContent,
+  type GuideRetailContent,
+  type GuideTicketsContent,
+  type GuideSegurosContent,
+  type BentoMinimalContent,
+} from "@/types/landing-templates";
+import { LandingContentFormBento } from "./LandingContentFormBento";
+import { LandingContentFormRetail } from "./LandingContentFormRetail";
+import { LandingContentFormTickets } from "./LandingContentFormTickets";
+import { LandingContentFormSeguros } from "./LandingContentFormSeguros";
 
 const brandingSchema = z.object({
   mainLogoUrl: z.string().optional().nullable(),
@@ -31,9 +44,20 @@ const brandingSchema = z.object({
   heroTitle: z.string(),
   heroSubtitle: z.string(),
   botUrl: z.string().optional().nullable(),
+  botButtonText: z.string().optional().nullable(),
+  botUrl2: z.string().optional().nullable(),
+  botButtonText2: z.string().optional().nullable(),
+  templateId: z.enum(["guide-retail", "guide-tickets", "guide-seguros", "bento-minimal"]),
 });
 
 type BrandingFormData = z.infer<typeof brandingSchema>;
+
+const TEMPLATE_LABELS: Record<TemplateId, string> = {
+  "guide-retail": "Guía Retail (Avatar, pasillos, capacidades)",
+  "guide-tickets": "Guía Tickets (Mesa de servicio, catálogo)",
+  "guide-seguros": "Guía Seguros (Agente conversacional)",
+  "bento-minimal": "Bento Minimal (Tarjetas simples)",
+};
 
 interface ClientBrandingFormProps {
   clientId: number;
@@ -42,6 +66,11 @@ interface ClientBrandingFormProps {
   initialBranding: UpdateBrandingInput & {
     mainLogoUrl: string | null;
     faviconUrl: string | null;
+    botButtonText?: string | null;
+    botUrl2?: string | null;
+    botButtonText2?: string | null;
+    templateId?: TemplateId;
+    landingContent?: string | null;
   };
 }
 
@@ -97,10 +126,35 @@ export function ClientBrandingForm({
 }: ClientBrandingFormProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [selectsMounted, setSelectsMounted] = useState(false);
+  const templateId = (initialBranding.templateId ?? "bento-minimal") as TemplateId;
+  const initialContent = useMemo(
+    () => parseLandingContent(templateId, initialBranding.landingContent),
+    [templateId, initialBranding.landingContent]
+  );
+  const [landingContentObj, setLandingContentObj] = useState<
+    GuideRetailContent | GuideTicketsContent | GuideSegurosContent | BentoMinimalContent
+  >(
+    initialContent as
+      | GuideRetailContent
+      | GuideTicketsContent
+      | GuideSegurosContent
+      | BentoMinimalContent
+  );
+  const isFirstTemplateSync = useRef(true);
 
   useEffect(() => {
     setSelectsMounted(true);
   }, []);
+
+  useEffect(() => {
+    setLandingContentObj(
+      parseLandingContent(templateId, initialBranding.landingContent) as
+        | GuideRetailContent
+        | GuideTicketsContent
+        | GuideSegurosContent
+        | BentoMinimalContent
+    );
+  }, [templateId, initialBranding.landingContent]);
 
   const {
     register,
@@ -122,10 +176,41 @@ export function ClientBrandingForm({
       heroTitle: initialBranding.heroTitle,
       heroSubtitle: initialBranding.heroSubtitle,
       botUrl: initialBranding.botUrl ?? "",
+      botButtonText: initialBranding.botButtonText ?? "Ir al Bot",
+      botUrl2: initialBranding.botUrl2 ?? "",
+      botButtonText2: initialBranding.botButtonText2 ?? "Segundo Bot",
+      templateId: templateId,
     },
   });
 
   const watched = watch();
+
+  useEffect(() => {
+    if (isFirstTemplateSync.current) {
+      isFirstTemplateSync.current = false;
+      return;
+    }
+    if (watched.templateId) {
+      setLandingContentObj(
+        getDefaultContent(watched.templateId as TemplateId) as
+          | GuideRetailContent
+          | GuideTicketsContent
+          | GuideSegurosContent
+          | BentoMinimalContent
+      );
+    }
+  }, [watched.templateId]);
+
+  const landingContentDirty =
+    JSON.stringify(landingContentObj) !==
+    JSON.stringify(
+      initialContent as
+        | GuideRetailContent
+        | GuideTicketsContent
+        | GuideSegurosContent
+        | BentoMinimalContent
+    );
+  const isFormDirty = isDirty || landingContentDirty;
 
   function handleDiscard() {
     reset({
@@ -139,7 +224,18 @@ export function ClientBrandingForm({
       heroTitle: initialBranding.heroTitle,
       heroSubtitle: initialBranding.heroSubtitle,
       botUrl: initialBranding.botUrl ?? "",
+      botButtonText: initialBranding.botButtonText ?? "Ir al Bot",
+      botUrl2: initialBranding.botUrl2 ?? "",
+      botButtonText2: initialBranding.botButtonText2 ?? "Segundo Bot",
+      templateId: templateId,
     });
+    setLandingContentObj(
+      initialContent as
+        | GuideRetailContent
+        | GuideTicketsContent
+        | GuideSegurosContent
+        | BentoMinimalContent
+    );
     toast.info("Cambios descartados");
   }
 
@@ -156,6 +252,11 @@ export function ClientBrandingForm({
       heroTitle: data.heroTitle,
       heroSubtitle: data.heroSubtitle,
       botUrl: data.botUrl || null,
+      botButtonText: data.botButtonText || null,
+      botUrl2: data.botUrl2 || null,
+      botButtonText2: data.botButtonText2 || null,
+      templateId: data.templateId,
+      landingContent: JSON.stringify(landingContentObj),
     });
 
     setIsSaving(false);
@@ -192,13 +293,13 @@ export function ClientBrandingForm({
           </Link>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleDiscard} disabled={!isDirty}>
+          <Button variant="outline" onClick={handleDiscard} disabled={!isFormDirty}>
             Descartar
           </Button>
           <Button
             className="bg-orange-600 hover:bg-orange-700"
             onClick={handleSubmit(onSubmit)}
-            disabled={!isDirty || isSaving}
+            disabled={!isFormDirty || isSaving}
           >
             {isSaving ? "Guardando..." : "Guardar cambios"}
           </Button>
@@ -466,18 +567,118 @@ export function ClientBrandingForm({
                     placeholder="Guía para interactuar con tu agente"
                   />
                 </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="botUrl">URL de Bot Principal</Label>
+                    <Input
+                      id="botUrl"
+                      type="url"
+                      {...register("botUrl")}
+                      placeholder="https://..."
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="botButtonText">Texto Bot Principal</Label>
+                    <Input
+                      id="botButtonText"
+                      type="text"
+                      {...register("botButtonText")}
+                      placeholder="Ir al Bot"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="botUrl2">URL Segundo Bot (Opcional)</Label>
+                    <Input
+                      id="botUrl2"
+                      type="url"
+                      {...register("botUrl2")}
+                      placeholder="https://..."
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="botButtonText2">Texto Segundo Bot</Label>
+                    <Input
+                      id="botButtonText2"
+                      type="text"
+                      {...register("botButtonText2")}
+                      placeholder="Segundo Bot"
+                    />
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Landing Template */}
+            <section className="rounded-lg border border-zinc-200 bg-white p-6">
+              <h2 className="mb-4 text-lg font-semibold text-zinc-900">
+                4. LANDING TEMPLATE
+              </h2>
+              <div className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="botUrl">URL del Bot</Label>
-                  <Input
-                    id="botUrl"
-                    type="url"
-                    {...register("botUrl")}
-                    placeholder="https://..."
-                  />
+                  <Label>Plantilla del cuerpo de la landing</Label>
+                  {selectsMounted ? (
+                    <Select
+                      value={watched.templateId}
+                      onValueChange={(v) =>
+                        setValue("templateId", v as TemplateId, {
+                          shouldDirty: true,
+                        })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="guide-retail">
+                          {TEMPLATE_LABELS["guide-retail"]}
+                        </SelectItem>
+                        <SelectItem value="guide-tickets">
+                          {TEMPLATE_LABELS["guide-tickets"]}
+                        </SelectItem>
+                        <SelectItem value="guide-seguros">
+                          {TEMPLATE_LABELS["guide-seguros"]}
+                        </SelectItem>
+                        <SelectItem value="bento-minimal">
+                          {TEMPLATE_LABELS["bento-minimal"]}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <div className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm">
+                      {TEMPLATE_LABELS[watched.templateId as TemplateId]}
+                    </div>
+                  )}
                   <p className="text-xs text-zinc-500">
-                    URL donde está desplegado el bot conversacional
+                    Elige la estructura del contenido debajo del hero. El texto se
+                    configura más abajo.
                   </p>
                 </div>
+                {watched.templateId === "bento-minimal" && (
+                  <LandingContentFormBento
+                    value={landingContentObj as BentoMinimalContent}
+                    onChange={(v) => setLandingContentObj(v)}
+                  />
+                )}
+                {watched.templateId === "guide-retail" && (
+                  <LandingContentFormRetail
+                    value={landingContentObj as GuideRetailContent}
+                    onChange={(v) => setLandingContentObj(v)}
+                  />
+                )}
+                {watched.templateId === "guide-tickets" && (
+                  <LandingContentFormTickets
+                    value={landingContentObj as GuideTicketsContent}
+                    onChange={(v) => setLandingContentObj(v)}
+                  />
+                )}
+                {watched.templateId === "guide-seguros" && (
+                  <LandingContentFormSeguros
+                    value={landingContentObj as GuideSegurosContent}
+                    onChange={(v) => setLandingContentObj(v)}
+                  />
+                )}
               </div>
             </section>
           </div>
@@ -573,17 +774,20 @@ export function ClientBrandingForm({
                       className="rounded px-4 py-2 text-sm font-medium text-white"
                       style={{ backgroundColor: watched.primaryColor }}
                     >
-                      IR AL BOT
+                      {watched.botButtonText || "IR AL BOT"}
                     </div>
-                    <div
-                      className="rounded border px-4 py-2 text-sm"
-                      style={{
-                        borderColor: watched.primaryColor,
-                        color: watched.primaryColor,
-                      }}
-                    >
-                      Más info
-                    </div>
+                    {watched.botUrl2 && (
+                      <div
+                        className="rounded border px-4 py-2 text-sm font-medium"
+                        style={{
+                          borderColor: watched.primaryColor,
+                          color: watched.primaryColor,
+                          backgroundColor: 'transparent'
+                        }}
+                      >
+                        {watched.botButtonText2 || "SEGUNDO BOT"}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

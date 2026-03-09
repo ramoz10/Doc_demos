@@ -3,15 +3,17 @@
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { homedepotGuide } from "@/content/homedepot-guide";
+import type { GuideRetailContent } from "@/types/landing-templates";
 import { Check, X, MapPin, MessageCircle, Expand } from "lucide-react";
 
 interface HomeDepotGuideProps {
+  content: GuideRetailContent;
   primaryColor: string;
   secondaryColor: string;
 }
 
 export function HomeDepotGuide({
+  content,
   primaryColor,
   secondaryColor,
 }: HomeDepotGuideProps) {
@@ -58,7 +60,7 @@ export function HomeDepotGuide({
             className="text-lg leading-relaxed opacity-90"
             style={{ color: secondaryColor }}
           >
-            {homedepotGuide.resumen}
+            {content.resumen}
           </p>
         </motion.section>
 
@@ -164,7 +166,7 @@ export function HomeDepotGuide({
             Cómo usar el agente
           </h2>
           <ol className="space-y-3">
-            {homedepotGuide.flujo.map((paso, i) => (
+            {content.flujo.map((paso, i) => (
               <li
                 key={i}
                 className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-sm"
@@ -196,7 +198,7 @@ export function HomeDepotGuide({
             Tipos de preguntas que puedes hacer
           </h2>
           <div className="space-y-8">
-            {homedepotGuide.categoriasPreguntas.map((cat) => (
+            {content.categoriasPreguntas.map((cat) => (
               <div
                 key={cat.titulo}
                 className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm"
@@ -239,7 +241,7 @@ export function HomeDepotGuide({
             Pasillos de la tienda
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {homedepotGuide.pasillos.map((p) => (
+            {content.pasillos.map((p) => (
               <div
                 key={p.num}
                 className="flex items-start gap-3 rounded-lg border border-white/10 bg-white/5 p-4 backdrop-blur-sm"
@@ -286,7 +288,7 @@ export function HomeDepotGuide({
               Lo que puede hacer
             </h3>
             <ul className="space-y-2 text-sm">
-              {homedepotGuide.capacidades.map((c) => (
+              {content.capacidades.map((c) => (
                 <li key={c} className="flex items-start gap-2">
                   <span className="text-green-600 dark:text-green-400">✓</span>
                   {c}
@@ -303,7 +305,7 @@ export function HomeDepotGuide({
               Limitaciones actuales
             </h3>
             <ul className="space-y-2 text-sm">
-              {homedepotGuide.limitaciones.map((l) => (
+              {content.limitaciones.map((l) => (
                 <li key={l} className="flex items-start gap-2">
                   <span className="text-amber-600 dark:text-amber-400">✘</span>
                   {l}

@@ -1,15 +1,17 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { delsolGuide } from "@/content/delsol-guide";
+import type { GuideTicketsContent } from "@/types/landing-templates";
 import { Users, ClipboardList, Shield, Lightbulb } from "lucide-react";
 
 interface DelSolGuideProps {
+  content: GuideTicketsContent;
   primaryColor: string;
   secondaryColor: string;
 }
 
 export function DelSolGuide({
+  content,
   primaryColor,
   secondaryColor,
 }: DelSolGuideProps) {
@@ -33,7 +35,7 @@ export function DelSolGuide({
             className="text-lg leading-relaxed opacity-90"
             style={{ color: secondaryColor }}
           >
-            {delsolGuide.resumen}
+            {content.resumen}
           </p>
         </motion.section>
 
@@ -52,9 +54,9 @@ export function DelSolGuide({
             Flujo de interacción (cómo se usa)
           </h2>
           <ol className="space-y-3">
-            {delsolGuide.flujo.map((paso, i) => (
+            {content.flujo.map((paso) => (
               <li
-                key={paso.letra}
+                key={`${paso.letra}-${paso.titulo}`}
                 className="flex items-start gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-sm"
                 style={{ color: secondaryColor }}
               >
@@ -92,7 +94,7 @@ export function DelSolGuide({
             className="mb-4 text-lg leading-relaxed opacity-90"
             style={{ color: secondaryColor }}
           >
-            {delsolGuide.catalogoClientes.nota}
+            {content.catalogoClientes.nota}
           </p>
           <div className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
             <h3
@@ -103,7 +105,7 @@ export function DelSolGuide({
               Clientes disponibles
             </h3>
             <ul className="space-y-2 text-sm">
-              {delsolGuide.catalogoClientes.clientes.map((cliente) => (
+              {content.catalogoClientes.clientes.map((cliente) => (
                 <li
                   key={cliente}
                   className="flex items-start gap-2 opacity-90"
@@ -135,7 +137,7 @@ export function DelSolGuide({
             style={{ color: secondaryColor }}
           >
             <p className="text-lg leading-relaxed">
-              {delsolGuide.mensajeExito}
+              {content.mensajeExito}
             </p>
           </div>
         </motion.section>
@@ -161,7 +163,7 @@ export function DelSolGuide({
             al cliente para la demo o las pruebas del ciclo.
           </p>
           <div className="space-y-8">
-            {delsolGuide.ejemplosConversacion.map((ejemplo) => (
+            {content.ejemplosConversacion.map((ejemplo) => (
               <div
                 key={ejemplo.titulo}
                 className="overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm"
@@ -244,7 +246,7 @@ export function DelSolGuide({
               Para la demo con el cliente, este ejemplo permite ver:
             </h4>
             <ul className="space-y-1 pl-7 text-sm">
-              {delsolGuide.puntosDemo.map((punto) => (
+              {content.puntosDemo.map((punto) => (
                 <li key={punto} className="flex items-start gap-2">
                   <span className="-ml-5">•</span>
                   {punto}
@@ -271,7 +273,7 @@ export function DelSolGuide({
             className="mb-4 text-lg leading-relaxed opacity-90"
             style={{ color: secondaryColor }}
           >
-            {delsolGuide.pruebasDelCiclo.objetivo}
+            {content.pruebasDelCiclo.objetivo}
           </p>
           <div className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
             <h3
@@ -282,7 +284,7 @@ export function DelSolGuide({
               Áreas a probar
             </h3>
             <ul className="flex flex-wrap gap-2">
-              {delsolGuide.pruebasDelCiclo.areas.map((area) => (
+              {content.pruebasDelCiclo.areas.map((area) => (
                 <li
                   key={area}
                   className="rounded-lg border border-white/10 px-3 py-1.5 text-sm"
@@ -318,7 +320,7 @@ export function DelSolGuide({
               Importante
             </h3>
             <ul className="space-y-2 text-sm">
-              {delsolGuide.reglasClave.map((regla) => (
+              {content.reglasClave.map((regla) => (
                 <li
                   key={regla}
                   className="flex items-start gap-2"

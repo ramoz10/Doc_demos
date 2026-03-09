@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { clients, clientBranding } from "../../../drizzle/schema";
+import { DEFAULT_BENTO_MINIMAL } from "@/types/landing-templates";
 
 const createClientSchema = z.object({
   name: z.string().min(1, "Nombre requerido"),
@@ -25,6 +26,13 @@ const updateBrandingSchema = z.object({
   heroTitle: z.string(),
   heroSubtitle: z.string(),
   botUrl: z.string().url().optional().nullable(),
+  botButtonText: z.string().optional().nullable(),
+  botUrl2: z.string().url().optional().nullable(),
+  botButtonText2: z.string().optional().nullable(),
+  templateId: z
+    .enum(["guide-retail", "guide-tickets", "guide-seguros", "bento-minimal"])
+    .optional(),
+  landingContent: z.string().optional().nullable(),
 });
 
 export type CreateClientInput = z.infer<typeof createClientSchema>;
@@ -39,6 +47,11 @@ const DEFAULT_BRANDING = {
   heroTitle: "TU ASESOR VIRTUAL",
   heroSubtitle: "Guía para interactuar con tu agente de IA",
   botUrl: null as string | null,
+  botButtonText: "Ir al Bot",
+  botUrl2: null as string | null,
+  botButtonText2: "Segundo Bot",
+  templateId: "bento-minimal" as const,
+  landingContent: JSON.stringify(DEFAULT_BENTO_MINIMAL),
 };
 
 export async function createClient(input: CreateClientInput): Promise<
@@ -117,6 +130,11 @@ export async function getClientWithBranding(clientId: number): Promise<{
     heroTitle: string;
     heroSubtitle: string;
     botUrl: string | null;
+    botButtonText: string | null;
+    botUrl2: string | null;
+    botButtonText2: string | null;
+    templateId: string;
+    landingContent: string | null;
   };
 } | null> {
   const clientRow = await db
@@ -153,6 +171,11 @@ export async function getClientWithBranding(clientId: number): Promise<{
       heroTitle: branding.heroTitle,
       heroSubtitle: branding.heroSubtitle,
       botUrl: branding.botUrl,
+      botButtonText: branding.botButtonText,
+      botUrl2: branding.botUrl2,
+      botButtonText2: branding.botButtonText2,
+      templateId: branding.templateId,
+      landingContent: branding.landingContent,
     },
   };
 }
@@ -170,6 +193,11 @@ export async function getClientBySlug(slug: string): Promise<{
     heroTitle: string;
     heroSubtitle: string;
     botUrl: string | null;
+    botButtonText: string | null;
+    botUrl2: string | null;
+    botButtonText2: string | null;
+    templateId: string;
+    landingContent: string | null;
   };
 } | null> {
   const clientRow = await db
@@ -210,6 +238,15 @@ export async function updateClientBranding(
       heroTitle: parsed.data.heroTitle,
       heroSubtitle: parsed.data.heroSubtitle,
       botUrl: parsed.data.botUrl ?? undefined,
+      botButtonText: parsed.data.botButtonText ?? undefined,
+      botUrl2: parsed.data.botUrl2 ?? undefined,
+      botButtonText2: parsed.data.botButtonText2 ?? undefined,
+      ...(parsed.data.templateId !== undefined && {
+        templateId: parsed.data.templateId,
+      }),
+      ...(parsed.data.landingContent !== undefined && {
+        landingContent: parsed.data.landingContent ?? null,
+      }),
     })
     .where(eq(clientBranding.clientId, clientId));
 

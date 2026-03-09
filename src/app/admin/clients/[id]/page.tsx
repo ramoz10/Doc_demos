@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getClientWithBranding } from "@/server/actions/clients";
 import { ClientBrandingForm } from "@/components/admin/ClientBrandingForm";
+import type { TemplateId } from "@/types/landing-templates";
 
 export default async function ClientEditPage({
   params,
@@ -23,6 +24,8 @@ export default async function ClientEditPage({
         ...data.branding,
         contrastMode: data.branding.contrastMode as "light" | "dark",
         borderRadius: data.branding.borderRadius as "sm" | "md" | "lg",
+        templateId: data.branding.templateId as TemplateId,
+        landingContent: data.branding.landingContent ?? null,
       }}
     />
   );

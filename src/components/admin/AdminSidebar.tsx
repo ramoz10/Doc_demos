@@ -11,6 +11,7 @@ import {
   Bot,
   Settings,
   LogOut,
+  LayoutTemplate,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -58,6 +59,18 @@ export function AdminSidebar() {
         >
           <FileText className="h-4 w-4" />
           Content Manager
+        </Link>
+        <Link
+          href="/admin/templates"
+          className={cn(
+            "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+            pathname === "/admin/templates"
+              ? "bg-orange-600/20 text-orange-400"
+              : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
+          )}
+        >
+          <LayoutTemplate className="h-4 w-4" />
+          Plantillas
         </Link>
         <Link
           href="#"

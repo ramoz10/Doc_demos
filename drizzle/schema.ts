@@ -24,6 +24,11 @@ export const clientBranding = sqliteTable("client_branding", {
   heroTitle: text("hero_title").notNull(),
   heroSubtitle: text("hero_subtitle").notNull(),
   botUrl: text("bot_url"),
+  botButtonText: text("bot_button_text").default("Ir al Bot"),
+  botUrl2: text("bot_url_2"),
+  botButtonText2: text("bot_button_text_2").default("Segundo Bot"),
+  templateId: text("template_id").notNull().default("bento-minimal"),
+  landingContent: text("landing_content"),
 });
 
 export type Client = typeof clients.$inferSelect;

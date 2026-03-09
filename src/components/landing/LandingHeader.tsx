@@ -8,6 +8,9 @@ interface LandingHeaderProps {
   secondaryColor: string;
   backgroundColor: string;
   botUrl: string | null;
+  botButtonText: string | null;
+  botUrl2: string | null;
+  botButtonText2: string | null;
 }
 
 export function LandingHeader({
@@ -17,6 +20,9 @@ export function LandingHeader({
   secondaryColor,
   backgroundColor,
   botUrl,
+  botButtonText,
+  botUrl2,
+  botButtonText2,
 }: LandingHeaderProps) {
   return (
     <LandingHeaderClient
@@ -26,6 +32,9 @@ export function LandingHeader({
       secondaryColor={secondaryColor}
       backgroundColor={backgroundColor}
       botUrl={botUrl}
+      botButtonText={botButtonText}
+      botUrl2={botUrl2}
+      botButtonText2={botButtonText2}
     />
   );
 }
