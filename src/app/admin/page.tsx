@@ -46,10 +46,12 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-surface-variant to-primary/10">
-      <div className="w-full max-w-sm space-y-8 rounded-card p-8 animate-fade-in">
+    <div className="flex min-h-screen items-center justify-center bg-zinc-950">
+      <div className="w-full max-w-sm space-y-8 rounded-xl border border-zinc-700 bg-zinc-900/95 p-8 shadow-2xl animate-fade-in">
         <div className="text-center">
-          <h1 className="text-3xl font-bold font-sans tracking-tight text-white mb-2">HD Admin Panel</h1>
+          <h1 className="text-3xl font-bold font-sans tracking-tight text-white mb-2">
+            Admin / Backoffice
+          </h1>
           <p className="text-sm text-zinc-400">
             Inicia sesión para continuar
           </p>
@@ -98,7 +100,7 @@ export default function AdminLoginPage() {
 
           <Button
             type="submit"
-            className="w-full btn-primary"
+            className="w-full bg-orange-600 text-white hover:bg-orange-700"
             disabled={isSubmitting}
           >
             {isSubmitting ? "Entrando..." : "Entrar"}

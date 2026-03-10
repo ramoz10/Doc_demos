@@ -55,6 +55,21 @@ const TEMPLATE_META: Record<
       "resultadoEsperado (string)",
     ],
   },
+  "guide-entrenamiento": {
+    nombre: "Guía Entrenamiento",
+    descripcion:
+      "Bot Entrenador Banorte: simulador de cliente para contact center (escenarios, evaluación, calificación).",
+    estructura: [
+      "objetivo ({descripcion, habilidadesClave[]})",
+      "comoFunciona ({dinamica[], mensajeInicio})",
+      "escenarios ({numero, titulo, situacion, caracteristicasCliente[], agenteDebe[]}[])",
+      "realismo ({descripcion, comportamientos[], expresionEmocion[]})",
+      "manejoSilencios ({silencio15, silencio30})",
+      "evaluacion ({incluye[], criterios[], elementosOperativos[]})",
+      "calificacion ({filas[], indicadores[]})",
+      "repeticion, resultadoEsperado, duracion (string)",
+    ],
+  },
   "bento-minimal": {
     nombre: "Bento Minimal",
     descripcion: "Tarjetas simples (título, descripción, icono por card).",

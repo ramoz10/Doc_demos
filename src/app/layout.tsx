@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Space_Grotesk } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
@@ -14,9 +14,19 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
-  title: "Landing Pages Platform",
+  title: "Demos Contexta",
   description: "Plataforma de gestión de landing pages multi-cliente",
+  icons: {
+    icon: "/contexta-logo.png?v=2",
+    shortcut: "/contexta-logo.png?v=2",
+    apple: "/contexta-logo.png?v=2",
+  },
 };
 
 export default function RootLayout({
@@ -27,7 +37,7 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} antialiased`}
         suppressHydrationWarning
       >
         <ThemeProvider>

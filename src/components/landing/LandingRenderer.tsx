@@ -6,11 +6,13 @@ import {
   type GuideRetailContent,
   type GuideTicketsContent,
   type GuideSegurosContent,
+  type GuideEntrenamientoContent,
   type BentoMinimalContent,
 } from "@/types/landing-templates";
 import { HomeDepotGuide } from "./HomeDepotGuide";
 import { DelSolGuide } from "./DelSolGuide";
 import { MetlifeSegurosGuide } from "./MetlifeSegurosGuide";
+import { BanorteEntrenamientoGuide } from "./BanorteEntrenamientoGuide";
 import { BentoGrid } from "./BentoGrid";
 
 interface LandingRendererProps {
@@ -49,6 +51,14 @@ export function LandingRenderer({
       return (
         <MetlifeSegurosGuide
           content={content as GuideSegurosContent}
+          primaryColor={primaryColor}
+          secondaryColor={secondaryColor}
+        />
+      );
+    case "guide-entrenamiento":
+      return (
+        <BanorteEntrenamientoGuide
+          content={content as GuideEntrenamientoContent}
           primaryColor={primaryColor}
           secondaryColor={secondaryColor}
         />

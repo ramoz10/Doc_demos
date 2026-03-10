@@ -10,6 +10,7 @@ export const TEMPLATE_IDS = [
   "guide-retail",
   "guide-tickets",
   "guide-seguros",
+  "guide-entrenamiento",
   "bento-minimal",
 ] as const;
 
@@ -131,6 +132,60 @@ export const guideSegurosSchema = z.object({
 
 export type GuideSegurosContent = z.infer<typeof guideSegurosSchema>;
 
+// --- guide-entrenamiento (Bot Entrenador Banorte) ---
+export const guideEntrenamientoEscenarioSchema = z.object({
+  numero: z.number(),
+  titulo: z.string(),
+  situacion: z.string(),
+  caracteristicasCliente: z.array(z.string()),
+  agenteDebe: z.array(z.string()),
+});
+
+export const guideEntrenamientoCriterioSchema = z.object({
+  titulo: z.string(),
+  descripcion: z.string(),
+});
+
+export const guideEntrenamientoCalificacionFilaSchema = z.object({
+  rango: z.string(),
+  interpretacion: z.string(),
+});
+
+export const guideEntrenamientoSchema = z.object({
+  objetivo: z.object({
+    descripcion: z.string(),
+    habilidadesClave: z.array(z.string()),
+  }),
+  comoFunciona: z.object({
+    dinamica: z.array(z.string()),
+    mensajeInicio: z.string(),
+  }),
+  escenarios: z.array(guideEntrenamientoEscenarioSchema),
+  realismo: z.object({
+    descripcion: z.string(),
+    comportamientos: z.array(z.string()),
+    expresionEmocion: z.array(z.string()),
+  }),
+  manejoSilencios: z.object({
+    silencio15: z.string(),
+    silencio30: z.string(),
+  }),
+  evaluacion: z.object({
+    incluye: z.array(z.string()),
+    criterios: z.array(guideEntrenamientoCriterioSchema),
+    elementosOperativos: z.array(z.string()),
+  }),
+  calificacion: z.object({
+    filas: z.array(guideEntrenamientoCalificacionFilaSchema),
+    indicadores: z.array(z.string()),
+  }),
+  repeticion: z.string(),
+  resultadoEsperado: z.string(),
+  duracion: z.string(),
+});
+
+export type GuideEntrenamientoContent = z.infer<typeof guideEntrenamientoSchema>;
+
 // --- bento-minimal ---
 export const bentoCardSchema = z.object({
   title: z.string(),
@@ -149,6 +204,7 @@ export type LandingTemplateContent =
   | { templateId: "guide-retail"; content: GuideRetailContent }
   | { templateId: "guide-tickets"; content: GuideTicketsContent }
   | { templateId: "guide-seguros"; content: GuideSegurosContent }
+  | { templateId: "guide-entrenamiento"; content: GuideEntrenamientoContent }
   | { templateId: "bento-minimal"; content: BentoMinimalContent };
 
 // --- Valores por defecto ---
@@ -302,6 +358,145 @@ export const DEFAULT_GUIDE_SEGUROS: GuideSegurosContent = {
     "El cliente recibe una explicación clara del seguro y puede tomar una decisión informada.",
 };
 
+export const DEFAULT_GUIDE_ENTRENAMIENTO: GuideEntrenamientoContent = {
+  objetivo: {
+    descripcion:
+      "El Bot Entrenador Banorte es una herramienta diseñada para capacitar agentes de contact center mediante simulaciones realistas de llamadas con clientes. Durante el entrenamiento el bot simula ser un cliente real de Banorte, presenta situaciones comunes del servicio al cliente, permite al agente practicar manejo de llamadas y evalúa el desempeño al finalizar la simulación.",
+    habilidadesClave: [
+      "Atención al cliente",
+      "Manejo de situaciones difíciles",
+      "Comunicación profesional",
+      "Resolución de problemas",
+    ],
+  },
+  comoFunciona: {
+    dinamica: [
+      "El bot inicia la simulación.",
+      "El agente debe atender la llamada como si fuera un cliente real.",
+      "El bot responde de acuerdo con un escenario específico.",
+      "Al finalizar la interacción, el bot realiza una evaluación del desempeño.",
+    ],
+    mensajeInicio:
+      "Iniciando entrenamiento, soy tu cliente simulado listo para comenzar, por favor inicia como lo harías con un cliente real cuando ya recibes la llamada.",
+  },
+  escenarios: [
+    {
+      numero: 1,
+      titulo: "Cliente muy molesto",
+      situacion: "Cargos no reconocidos en tarjeta Banorte.",
+      caracteristicasCliente: [
+        "Alto nivel de enojo",
+        "Frases cortas y directas",
+        "Exige solución inmediata",
+        "Interrumpe respuestas poco claras",
+      ],
+      agenteDebe: [
+        "Empatía",
+        "Control de la situación",
+        "Explicación clara del proceso de investigación.",
+      ],
+    },
+    {
+      numero: 2,
+      titulo: "Cliente apresurado",
+      situacion: "El cliente quiere conocer su saldo inmediatamente.",
+      caracteristicasCliente: [
+        "Habla rápido",
+        "Presiona al agente",
+        "Inicialmente no quiere validar datos",
+      ],
+      agenteDebe: [
+        "Mantener control de la llamada",
+        "Solicitar correctamente los datos de validación",
+        "Seguir el proceso de seguridad antes de proporcionar información.",
+      ],
+    },
+    {
+      numero: 3,
+      titulo: "Cliente confundido",
+      situacion: "El cliente ve un adeudo que no reconoce.",
+      caracteristicasCliente: [
+        "Tono inseguro",
+        "Repite preguntas",
+        "Necesita orientación paso a paso",
+      ],
+      agenteDebe: [
+        "Explicar claramente",
+        "Guiar la conversación",
+        "Confirmar comprensión del cliente.",
+      ],
+    },
+  ],
+  realismo: {
+    descripcion:
+      "El bot reproduce comportamientos reales de clientes como molestia o frustración, prisa por resolver o confusión sobre productos bancarios.",
+    comportamientos: [
+      "Molestia o frustración",
+      "Prisa o presión por resolver",
+      "Confusión sobre productos bancarios",
+    ],
+    expresionEmocion: [
+      "Frases cortas",
+      "Repetición de ideas",
+      "Uso ocasional de mayúsculas",
+      "Ritmo de conversación variable según el escenario.",
+    ],
+  },
+  manejoSilencios: {
+    silencio15: "Después de 15 segundos sin respuesta, el bot preguntará: «¿Sigues ahí?»",
+    silencio30:
+      "Después de 30 segundos de silencio, el sistema finaliza la simulación, genera automáticamente la evaluación del agente y presenta los resultados.",
+  },
+  evaluacion: {
+    incluye: [
+      "Calificación general",
+      "Análisis de habilidades clave",
+      "Retroalimentación detallada",
+      "Recomendaciones de mejora",
+    ],
+    criterios: [
+      {
+        titulo: "Empatía",
+        descripcion: "Capacidad del agente para demostrar comprensión de la situación del cliente.",
+      },
+      {
+        titulo: "Tranquilidad",
+        descripcion: "Capacidad para mantener control de la conversación y explicar claramente los procesos.",
+      },
+      {
+        titulo: "Garantía de servicio",
+        descripcion: "Capacidad de confirmar que el problema del cliente ha sido solucionado.",
+      },
+    ],
+    elementosOperativos: [
+      "Saludo profesional",
+      "Identificación del agente",
+      "Agradecimiento al cliente",
+      "Confirmación de solución",
+      "Oferta de ayuda adicional",
+      "Mención de encuesta de satisfacción",
+      "Despedida profesional",
+    ],
+  },
+  calificacion: {
+    filas: [
+      { rango: "9 – 10", interpretacion: "Nivel Contact Center Aprobado" },
+      { rango: "6 – 8", interpretacion: "Nivel Aceptable con áreas de mejora" },
+      { rango: "0 – 5", interpretacion: "Requiere reentrenamiento" },
+    ],
+    indicadores: [
+      "Fortalezas del agente",
+      "Áreas de mejora",
+      "Recomendaciones para futuras llamadas.",
+    ],
+  },
+  repeticion:
+    "Después de la evaluación, el sistema preguntará al agente: «¿Desea realizar otra simulación de entrenamiento con un escenario diferente?» Si responde Sí, se iniciará un nuevo escenario. Si responde No, el sistema finalizará la sesión.",
+  resultadoEsperado:
+    "El uso continuo del Bot Entrenador permite mejorar la preparación de agentes, simular situaciones reales de atención, identificar áreas de mejora y elevar la calidad del servicio al cliente.",
+  duracion: "Entre 10 y 15 minutos por simulación.",
+};
+
 export const DEFAULT_BENTO_MINIMAL: BentoMinimalContent = {
   cards: [
     {
@@ -329,6 +524,7 @@ export function getDefaultContent(templateId: TemplateId):
   | GuideRetailContent
   | GuideTicketsContent
   | GuideSegurosContent
+  | GuideEntrenamientoContent
   | BentoMinimalContent {
   switch (templateId) {
     case "guide-retail":
@@ -337,6 +533,8 @@ export function getDefaultContent(templateId: TemplateId):
       return DEFAULT_GUIDE_TICKETS;
     case "guide-seguros":
       return DEFAULT_GUIDE_SEGUROS;
+    case "guide-entrenamiento":
+      return DEFAULT_GUIDE_ENTRENAMIENTO;
     case "bento-minimal":
       return DEFAULT_BENTO_MINIMAL;
     default:
@@ -348,6 +546,7 @@ const schemaMap = {
   "guide-retail": guideRetailSchema,
   "guide-tickets": guideTicketsSchema,
   "guide-seguros": guideSegurosSchema,
+  "guide-entrenamiento": guideEntrenamientoSchema,
   "bento-minimal": bentoMinimalSchema,
 } as const;
 
@@ -358,6 +557,7 @@ export function parseLandingContent(
   | GuideRetailContent
   | GuideTicketsContent
   | GuideSegurosContent
+  | GuideEntrenamientoContent
   | BentoMinimalContent {
   if (!raw) {
     return getDefaultContent(templateId);

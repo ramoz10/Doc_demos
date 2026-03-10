@@ -30,7 +30,7 @@ const updateBrandingSchema = z.object({
   botUrl2: z.string().url().optional().nullable(),
   botButtonText2: z.string().optional().nullable(),
   templateId: z
-    .enum(["guide-retail", "guide-tickets", "guide-seguros", "bento-minimal"])
+    .enum(["guide-retail", "guide-tickets", "guide-seguros", "guide-entrenamiento", "bento-minimal"])
     .optional(),
   landingContent: z.string().optional().nullable(),
 });
@@ -261,5 +261,86 @@ export async function updateClientBranding(
   if (slugResult[0]?.slug) {
     revalidatePath(`/${slugResult[0].slug}`);
   }
+  return { success: true };
+}
+
+const updateClientSchema = z.object({
+  name: z.string().min(1, "Nombre requerido"),
+  slug: z
+    .string()
+    .min(1, "Slug requerido")
+    .regex(/^[a-z0-9-]+$/, "Slug: solo minúsculas, números y guiones"),
+});
+
+export async function updateClient(
+  clientId: number,
+  input: z.infer<typeof updateClientSchema>
+): Promise<{ success: true } | { success: false; error: string }> {
+  const parsed = updateClientSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.issues
+        .map((e: { message?: string }) => e.message ?? "Validation error")
+        .join(", "),
+    };
+  }
+
+  const { name, slug } = parsed.data;
+  const slugLower = slug.toLowerCase();
+
+  const existingBySlug = await db
+    .select({ id: clients.id })
+    .from(clients)
+    .where(eq(clients.slug, slugLower))
+    .limit(1);
+
+  if (existingBySlug.length > 0 && existingBySlug[0].id !== clientId) {
+    return { success: false, error: "Ya existe otro cliente con ese slug" };
+  }
+
+  const oldRow = await db
+    .select({ slug: clients.slug })
+    .from(clients)
+    .where(eq(clients.id, clientId))
+    .limit(1);
+
+  if (oldRow.length === 0) {
+    return { success: false, error: "Cliente no encontrado" };
+  }
+
+  await db
+    .update(clients)
+    .set({ name, slug: slugLower })
+    .where(eq(clients.id, clientId));
+
+  revalidatePath("/admin/dashboard");
+  revalidatePath(`/admin/clients/${clientId}`);
+  revalidatePath("/");
+  if (oldRow[0].slug) revalidatePath(`/${oldRow[0].slug}`);
+  if (slugLower !== oldRow[0].slug) revalidatePath(`/${slugLower}`);
+
+  return { success: true };
+}
+
+export async function deleteClient(
+  clientId: number
+): Promise<{ success: true } | { success: false; error: string }> {
+  const row = await db
+    .select({ slug: clients.slug })
+    .from(clients)
+    .where(eq(clients.id, clientId))
+    .limit(1);
+
+  if (row.length === 0) {
+    return { success: false, error: "Cliente no encontrado" };
+  }
+
+  await db.delete(clientBranding).where(eq(clientBranding.clientId, clientId));
+  await db.delete(clients).where(eq(clients.id, clientId));
+
+  revalidatePath("/admin/dashboard");
+  revalidatePath("/");
+  revalidatePath(`/${row[0].slug}`);
   return { success: true };
 }

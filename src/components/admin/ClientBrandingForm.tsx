@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -17,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { UploadButton } from "@/lib/uploadthing";
-import { updateClientBranding, type UpdateBrandingInput } from "@/server/actions/clients";
+import { updateClientBranding, updateClient, deleteClient, type UpdateBrandingInput } from "@/server/actions/clients";
 import { Trash2 } from "lucide-react";
 import type { TemplateId } from "@/types/landing-templates";
 import {
@@ -26,6 +27,7 @@ import {
   type GuideRetailContent,
   type GuideTicketsContent,
   type GuideSegurosContent,
+  type GuideEntrenamientoContent,
   type BentoMinimalContent,
 } from "@/types/landing-templates";
 import { LandingContentFormBento } from "./LandingContentFormBento";
@@ -34,6 +36,11 @@ import { LandingContentFormTickets } from "./LandingContentFormTickets";
 import { LandingContentFormSeguros } from "./LandingContentFormSeguros";
 
 const brandingSchema = z.object({
+  clientName: z.string().min(1, "Nombre del cliente requerido"),
+  clientSlug: z
+    .string()
+    .min(1, "Slug requerido")
+    .regex(/^[a-z0-9-]+$/, "Solo minúsculas, números y guiones"),
   mainLogoUrl: z.string().optional().nullable(),
   faviconUrl: z.string().optional().nullable(),
   primaryColor: z.string().min(1),
@@ -47,7 +54,7 @@ const brandingSchema = z.object({
   botButtonText: z.string().optional().nullable(),
   botUrl2: z.string().optional().nullable(),
   botButtonText2: z.string().optional().nullable(),
-  templateId: z.enum(["guide-retail", "guide-tickets", "guide-seguros", "bento-minimal"]),
+  templateId: z.enum(["guide-retail", "guide-tickets", "guide-seguros", "guide-entrenamiento", "bento-minimal"]),
 });
 
 type BrandingFormData = z.infer<typeof brandingSchema>;
@@ -56,6 +63,7 @@ const TEMPLATE_LABELS: Record<TemplateId, string> = {
   "guide-retail": "Guía Retail (Avatar, pasillos, capacidades)",
   "guide-tickets": "Guía Tickets (Mesa de servicio, catálogo)",
   "guide-seguros": "Guía Seguros (Agente conversacional)",
+  "guide-entrenamiento": "Guía Entrenamiento (Bot Entrenador Banorte)",
   "bento-minimal": "Bento Minimal (Tarjetas simples)",
 };
 
@@ -124,7 +132,9 @@ export function ClientBrandingForm({
   clientSlug,
   initialBranding,
 }: ClientBrandingFormProps) {
+  const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [selectsMounted, setSelectsMounted] = useState(false);
   const templateId = (initialBranding.templateId ?? "bento-minimal") as TemplateId;
   const initialContent = useMemo(
@@ -132,12 +142,17 @@ export function ClientBrandingForm({
     [templateId, initialBranding.landingContent]
   );
   const [landingContentObj, setLandingContentObj] = useState<
-    GuideRetailContent | GuideTicketsContent | GuideSegurosContent | BentoMinimalContent
+    | GuideRetailContent
+    | GuideTicketsContent
+    | GuideSegurosContent
+    | GuideEntrenamientoContent
+    | BentoMinimalContent
   >(
     initialContent as
       | GuideRetailContent
       | GuideTicketsContent
       | GuideSegurosContent
+      | GuideEntrenamientoContent
       | BentoMinimalContent
   );
   const isFirstTemplateSync = useRef(true);
@@ -152,6 +167,7 @@ export function ClientBrandingForm({
         | GuideRetailContent
         | GuideTicketsContent
         | GuideSegurosContent
+        | GuideEntrenamientoContent
         | BentoMinimalContent
     );
   }, [templateId, initialBranding.landingContent]);
@@ -162,10 +178,12 @@ export function ClientBrandingForm({
     watch,
     setValue,
     reset,
-    formState: { isDirty },
+    formState: { isDirty, errors },
   } = useForm<BrandingFormData>({
     resolver: zodResolver(brandingSchema),
     defaultValues: {
+      clientName: clientName,
+      clientSlug: clientSlug,
       mainLogoUrl: initialBranding.mainLogoUrl ?? "",
       faviconUrl: initialBranding.faviconUrl ?? "",
       primaryColor: initialBranding.primaryColor,
@@ -196,6 +214,7 @@ export function ClientBrandingForm({
           | GuideRetailContent
           | GuideTicketsContent
           | GuideSegurosContent
+          | GuideEntrenamientoContent
           | BentoMinimalContent
       );
     }
@@ -214,6 +233,8 @@ export function ClientBrandingForm({
 
   function handleDiscard() {
     reset({
+      clientName: clientName,
+      clientSlug: clientSlug,
       mainLogoUrl: initialBranding.mainLogoUrl ?? "",
       faviconUrl: initialBranding.faviconUrl ?? "",
       primaryColor: initialBranding.primaryColor,
@@ -241,6 +262,23 @@ export function ClientBrandingForm({
 
   async function onSubmit(data: BrandingFormData) {
     setIsSaving(true);
+    const slugNormalized = data.clientSlug.toLowerCase().trim();
+
+    if (data.clientName !== clientName || slugNormalized !== clientSlug) {
+      const clientResult = await updateClient(clientId, {
+        name: data.clientName.trim(),
+        slug: slugNormalized,
+      });
+      if (!clientResult.success) {
+        toast.error(clientResult.error ?? "Error al actualizar cliente");
+        setIsSaving(false);
+        return;
+      }
+      if (slugNormalized !== clientSlug) {
+        router.refresh();
+      }
+    }
+
     const result = await updateClientBranding(clientId, {
       mainLogoUrl: data.mainLogoUrl || null,
       faviconUrl: data.faviconUrl || null,
@@ -262,6 +300,9 @@ export function ClientBrandingForm({
     setIsSaving(false);
     if (result.success) {
       toast.success("Cambios guardados");
+      if (data.clientName !== clientName || slugNormalized !== clientSlug) {
+        router.refresh();
+      }
     } else {
       toast.error(result.error ?? "Error al guardar");
     }
@@ -281,10 +322,10 @@ export function ClientBrandingForm({
             Dashboard Customization
           </h1>
           <p className="mt-1 text-zinc-600">
-            Gestiona la identidad de marca del agente: {clientName}
+            Gestiona la identidad de marca del agente: {watched.clientName || clientName}
           </p>
           <Link
-            href={`/${clientSlug}`}
+            href={`/${(watched.clientSlug || clientSlug).toLowerCase()}`}
             target="_blank"
             rel="noopener noreferrer"
             className="mt-2 inline-block text-sm text-orange-600 hover:text-orange-700"
@@ -292,7 +333,7 @@ export function ClientBrandingForm({
             Ver landing →
           </Link>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" onClick={handleDiscard} disabled={!isFormDirty}>
             Descartar
           </Button>
@@ -303,10 +344,77 @@ export function ClientBrandingForm({
           >
             {isSaving ? "Guardando..." : "Guardar cambios"}
           </Button>
+          <Button
+            type="button"
+            variant="outline"
+            className="ml-auto border-red-300 text-red-700 hover:bg-red-50 hover:text-red-800"
+            disabled={isDeleting}
+            onClick={async () => {
+              if (
+                !window.confirm(
+                  `¿Borrar el cliente "${watched.clientName || clientName}"? Se eliminará la landing y todo su branding. Esta acción no se puede deshacer.`
+                )
+              ) {
+                return;
+              }
+              setIsDeleting(true);
+              const result = await deleteClient(clientId);
+              if (result.success) {
+                toast.success("Cliente eliminado");
+                router.push("/admin/dashboard");
+                router.refresh();
+              } else {
+                toast.error(result.error ?? "Error al eliminar");
+                setIsDeleting(false);
+              }
+            }}
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            {isDeleting ? "Eliminando..." : "Borrar cliente"}
+          </Button>
         </div>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+        <section className="rounded-lg border border-zinc-200 bg-white p-6">
+          <h2 className="mb-4 text-lg font-semibold text-zinc-900">
+            Datos del cliente
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="clientName" className="text-zinc-700">
+                Nombre del cliente
+              </Label>
+              <Input
+                id="clientName"
+                {...register("clientName")}
+                className="border-zinc-300 bg-white text-zinc-900"
+                placeholder="Ej: Mi Empresa"
+              />
+              {errors.clientName && (
+                <p className="text-sm text-red-500">{errors.clientName.message}</p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="clientSlug" className="text-zinc-700">
+                Slug (URL de la landing)
+              </Label>
+              <Input
+                id="clientSlug"
+                {...register("clientSlug")}
+                className="border-zinc-300 bg-white font-mono text-zinc-900"
+                placeholder="mi-empresa"
+              />
+              <p className="text-xs text-zinc-500">
+                Solo minúsculas, números y guiones. La landing será /{watched.clientSlug || "slug"}
+              </p>
+              {errors.clientSlug && (
+                <p className="text-sm text-red-500">{errors.clientSlug.message}</p>
+              )}
+            </div>
+          </div>
+        </section>
+
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="space-y-8 lg:col-span-2">
             {/* Branding Assets */}
@@ -640,6 +748,9 @@ export function ClientBrandingForm({
                         <SelectItem value="guide-seguros">
                           {TEMPLATE_LABELS["guide-seguros"]}
                         </SelectItem>
+                        <SelectItem value="guide-entrenamiento">
+                          {TEMPLATE_LABELS["guide-entrenamiento"]}
+                        </SelectItem>
                         <SelectItem value="bento-minimal">
                           {TEMPLATE_LABELS["bento-minimal"]}
                         </SelectItem>
@@ -678,6 +789,11 @@ export function ClientBrandingForm({
                     value={landingContentObj as GuideSegurosContent}
                     onChange={(v) => setLandingContentObj(v)}
                   />
+                )}
+                {watched.templateId === "guide-entrenamiento" && (
+                  <p className="rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-600">
+                    Contenido por defecto del Bot Entrenador Banorte (escenarios, evaluación, calificación). El preview refleja el contenido actual.
+                  </p>
                 )}
               </div>
             </section>

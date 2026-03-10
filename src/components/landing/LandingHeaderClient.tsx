@@ -34,29 +34,29 @@ export function LandingHeaderClient({
 }: LandingHeaderClientProps) {
   return (
     <header
-      className="sticky top-0 z-50 border-b border-white/10 backdrop-blur-xl"
+      className="sticky top-0 z-50 border-b border-white/10 backdrop-blur-xl min-h-16 py-3 md:h-16 md:py-0"
       style={{
         backgroundColor: `${secondaryColor}ee`,
       }}
     >
-      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-        <div className="flex items-center gap-3">
+      <nav className="mx-auto flex max-w-7xl flex-col gap-3 px-6 md:h-full md:flex-row md:items-center md:justify-between md:gap-0">
+        <div className="flex min-w-0 flex-shrink-0 items-center gap-3">
           {mainLogoUrl ? (
             <img
               src={mainLogoUrl}
               alt={clientName}
-              className="h-9 object-contain"
+              className="h-9 shrink-0 object-contain"
             />
           ) : (
             <div
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-sm font-bold text-white"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white"
               style={{ backgroundColor: primaryColor }}
             >
               {clientName.slice(0, 2).toUpperCase()}
             </div>
           )}
           <span
-            className="text-lg font-bold uppercase tracking-tight"
+            className="truncate text-lg font-bold uppercase tracking-tight"
             style={{
               color: backgroundColor,
               textShadow: `0 0 20px ${primaryColor}40`,
@@ -79,7 +79,7 @@ export function LandingHeaderClient({
           ))}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex w-full flex-wrap items-center justify-center gap-2 md:w-auto md:justify-end md:gap-3">
           {botUrl ? (
             <Link
               href={botUrl}
@@ -100,17 +100,20 @@ export function LandingHeaderClient({
               </span>
             )
           )}
-          
+
           {botUrl2 && (
             <Link
               href={botUrl2}
               target="_blank"
               rel="noopener noreferrer"
               className="rounded-lg px-5 py-2.5 text-sm font-semibold uppercase transition-opacity hover:opacity-90"
-              style={{ 
-                backgroundColor: 'transparent', 
-                color: backgroundColor === '#FFFFFF' || backgroundColor === '#ffffff' ? primaryColor : backgroundColor,
-                border: `2px solid ${primaryColor}` 
+              style={{
+                backgroundColor: "transparent",
+                color:
+                  backgroundColor === "#FFFFFF" || backgroundColor === "#ffffff"
+                    ? primaryColor
+                    : backgroundColor,
+                border: `2px solid ${primaryColor}`,
               }}
             >
               {botButtonText2 || "Segundo Bot"}
