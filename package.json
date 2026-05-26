@@ -20,6 +20,7 @@
     "db:seed-homedepot": "npx tsx scripts/seed-homedepot.ts",
     "db:seed-delsol": "npx tsx scripts/seed-delsol.ts",
     "db:seed-metlife-seguros": "npx tsx scripts/seed-metlife-seguros.ts",
+    "deploy:production": "bash scripts/deploy-production.sh",
     "db:seed-banorte-entrenamiento": "npx tsx scripts/seed-banorte-entrenamiento.ts",
     "db:migrate-landing-templates": "npx tsx scripts/migrate-landing-templates.ts"
   },

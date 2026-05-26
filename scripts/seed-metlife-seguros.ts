@@ -1,11 +1,15 @@
 /**
- * Crea el cliente MetLife-Seguros con branding configurado.
- * Ejecutar: npx tsx scripts/seed-metlife-seguros.ts
+ * Crea o actualiza MetLife-Seguros: hero, colores y guía (landingContent).
+ * Ejecutar tras cambiar scripts/seed-metlife-seguros.ts o src/content/metlife-seguros-guide.ts
  */
 import { eq } from "drizzle-orm";
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { clients, clientBranding } from "../drizzle/schema";
+import { metlifeSegurosGuide } from "../src/content/metlife-seguros-guide";
+
+const METLIFE_TEMPLATE_ID = "guide-seguros";
+const landingContent = JSON.stringify(metlifeSegurosGuide);
 
 const sqlite = new Database("data/platform.db");
 const db = drizzle(sqlite);
@@ -66,15 +70,19 @@ if (row) {
         primaryColor: branding.primaryColor,
         backgroundColor: branding.backgroundColor,
         secondaryColor: branding.secondaryColor,
+        templateId: METLIFE_TEMPLATE_ID,
+        landingContent,
       })
       .where(eq(clientBranding.clientId, row.id))
       .run();
-    console.log("Cliente MetLife-Seguros actualizado.");
+    console.log("Cliente MetLife-Seguros actualizado (branding + guía).");
   } else {
     db.insert(clientBranding)
       .values({
         clientId: row.id,
         ...branding,
+        templateId: METLIFE_TEMPLATE_ID,
+        landingContent,
       })
       .run();
     console.log("Cliente MetLife-Seguros creado.");
