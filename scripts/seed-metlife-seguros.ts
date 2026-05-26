@@ -21,7 +21,7 @@ const branding = {
   secondaryColor: "#1a1a2e",
   contrastMode: "light",
   borderRadius: "md",
-  heroTitle: "Agente Conversacional MetLife – Banco Serfinanza",
+  heroTitle: "Agente Conversacional MetLife – Caja de compensación Colsubsidio",
   heroSubtitle:
     "Seguro voluntario de accidentes personales. Guía clara, profesional y confiable para que el cliente entienda el producto y tome una decisión informada.",
   botUrl: null as string | null,
