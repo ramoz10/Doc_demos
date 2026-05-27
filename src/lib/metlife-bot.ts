@@ -1,14 +1,11 @@
-/** Agente PrymeNet "Metlife 3" (voice bot embebido en la landing). */
-export const METLIFE_PRYMENET_AGENT_ID =
+/** MetLife Seguros — agente ConvAI (ElevenLabs), mismo id que en el dashboard. */
+export const METLIFE_ELEVENLABS_AGENT_ID =
   "agent_7501kjwm6f17fter0d3886rt38x0";
 
-export const PRYMENET_VOICE_BOT_ORIGIN = "https://prymenet.contexta.com.mx";
+/** Script oficial del widget (embed en la landing, sin iframe). */
+export const ELEVENLABS_CONVA_WIDGET_SCRIPT =
+  "https://unpkg.com/@elevenlabs/convai-widget-embed";
 
-export function buildMetlifePrymenetEmbedUrl(baseUrl?: string | null): string {
-  const origin = (baseUrl || PRYMENET_VOICE_BOT_ORIGIN).split("?")[0];
-  const url = new URL(origin);
-  url.searchParams.set("agent_id", METLIFE_PRYMENET_AGENT_ID);
-  url.searchParams.set("hide_selector", "1");
-  url.searchParams.set("lock", "metlife");
-  return url.toString();
-}
+/** Enlace del botón del header “Plataforma del Agente” → app ElevenLabs. */
+export const METLIFE_ELEVENLABS_APP_URL =
+  "https://elevenlabs.io/app/conversational-ai";
