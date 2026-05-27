@@ -9,3 +9,7 @@ export const ELEVENLABS_CONVA_WIDGET_SCRIPT =
 /** Enlace del botón del header “Plataforma del Agente” → app ElevenLabs. */
 export const METLIFE_ELEVENLABS_APP_URL =
   "https://elevenlabs.io/app/conversational-ai";
+
+/** PrymeNet: endpoint que emite signed URL para abrir conversación de voz. */
+export const PRYMENET_SIGNED_URL_ENDPOINT =
+  "https://prymenet.contexta.com.mx/api/signed-url";

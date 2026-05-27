@@ -32,6 +32,7 @@ export function ElevenLabsConvaiSection({
   const widgetRef = useRef<HTMLElement | null>(null);
   const [isInCall, setIsInCall] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [isStartingCall, setIsStartingCall] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const brandBlue = primaryColor || "#2d6df6";
@@ -103,16 +104,41 @@ export function ElevenLabsConvaiSection({
     };
   }, [scriptLoaded]);
 
-  const handleStartCall = () => {
+  const handleStartCall = async () => {
     setErrorMsg(null);
+    setIsStartingCall(true);
     const node = widgetRef.current as
-      | (HTMLElement & { startConversation?: () => void })
+      | (HTMLElement & {
+          startConversation?: () => void;
+          setAttribute: (name: string, value: string) => void;
+        })
       | null;
     if (!node?.startConversation) {
       setErrorMsg("El agente aún no está listo. Espera 1-2 segundos.");
+      setIsStartingCall(false);
       return;
     }
-    node.startConversation();
+    try {
+      const res = await fetch("/api/metlife/signed-url", { method: "GET" });
+      if (!res.ok) {
+        throw new Error("No se pudo obtener el token de conexión.");
+      }
+      const body = (await res.json()) as { signedUrl?: string };
+      if (!body?.signedUrl) {
+        throw new Error("No se recibió signed URL.");
+      }
+
+      node.setAttribute("signed-url", body.signedUrl);
+      node.startConversation();
+    } catch (error) {
+      const msg =
+        error instanceof Error
+          ? error.message
+          : "No se pudo iniciar la llamada.";
+      setErrorMsg(msg);
+    } finally {
+      setIsStartingCall(false);
+    }
   };
 
   const handleEndCall = () => {
@@ -211,11 +237,11 @@ export function ElevenLabsConvaiSection({
             <button
               type="button"
               onClick={handleStartCall}
-              disabled={!isReady || isInCall}
+              disabled={!isReady || isInCall || isStartingCall}
               className="inline-flex h-12 min-w-[170px] items-center justify-center rounded-[12px] px-6 text-sm font-extrabold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
               style={{ backgroundColor: startGreen }}
             >
-              Iniciar llamada
+              {isStartingCall ? "Conectando..." : "Iniciar llamada"}
             </button>
             <button
               type="button"
