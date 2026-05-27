@@ -26,8 +26,8 @@ export default async function ClientLandingPage({
         color: branding.secondaryColor,
       }}
     >
-      <div className="min-h-screen bg-black/5 flex flex-col items-stretch p-4 py-4 md:items-center md:justify-center md:py-12">
-        <div className="rounded-card p-8 mx-auto max-w-5xl w-full shadow-2xl animate-fade-in border border-white/10 dark:border-white/5">
+      <div className="flex min-h-screen flex-col items-stretch bg-black/5 px-4 pb-4 md:px-6 md:pb-8">
+        <div className="mx-auto w-full max-w-5xl animate-fade-in overflow-hidden rounded-card border border-white/10 shadow-2xl dark:border-white/5">
           <LandingHeader
             clientName={client.name}
             mainLogoUrl={branding.mainLogoUrl}
@@ -40,7 +40,7 @@ export default async function ClientLandingPage({
             botButtonText2={branding.botButtonText2}
             hideBotButtons={client.slug === "metlife-seguros"}
           />
-          <div className="pt-20 md:pt-16">
+          <div className="p-8 pt-20 md:pt-16">
             <LandingHero
               heroTitle={branding.heroTitle}
               heroSubtitle={branding.heroSubtitle}

@@ -37,7 +37,8 @@ export function ElevenLabsConvaiSection({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const brandBlue = primaryColor || "#2d6df6";
   const startGreen = "#2aad57";
-  const hangPink = "#e8adbf";
+  const hangRedActive = "#dc2626";
+  const hangRedIdle = "#fce4e8";
 
   const handleStartCall = async () => {
     setErrorMsg(null);
@@ -190,8 +191,12 @@ export function ElevenLabsConvaiSection({
               type="button"
               onClick={handleEndCall}
               disabled={!isInCall}
-              className="inline-flex h-10 min-w-[140px] items-center justify-center rounded-[10px] px-4 text-xs font-extrabold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
-              style={{ backgroundColor: hangPink }}
+              className="inline-flex h-10 min-w-[140px] items-center justify-center rounded-[10px] px-4 text-xs font-extrabold transition-colors disabled:cursor-not-allowed"
+              style={{
+                backgroundColor: isInCall ? hangRedActive : hangRedIdle,
+                color: isInCall ? "#ffffff" : "#9f4a5a",
+                opacity: 1,
+              }}
             >
               Colgar
             </button>

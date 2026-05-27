@@ -36,7 +36,7 @@ export function LandingHeaderClient({
 }: LandingHeaderClientProps) {
   return (
     <header
-      className="sticky top-0 z-50 border-b border-white/10 backdrop-blur-xl min-h-16 py-3 md:h-16 md:py-0"
+      className="sticky top-0 z-50 min-h-16 border-b border-white/10 py-3 backdrop-blur-xl md:h-16 md:py-0"
       style={{
         backgroundColor: `${secondaryColor}ee`,
       }}
