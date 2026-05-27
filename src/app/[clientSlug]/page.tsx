@@ -20,14 +20,14 @@ export default async function ClientLandingPage({
 
   return (
     <div
-      className="min-h-screen transition-colors duration-500"
+      className="transition-colors duration-500"
       style={{
         backgroundColor: branding.backgroundColor,
         color: branding.secondaryColor,
       }}
     >
-      <div className="flex min-h-screen flex-col items-stretch bg-black/5 px-4 pb-4 md:px-6 md:pb-8">
-        <div className="mx-auto w-full max-w-5xl animate-fade-in overflow-hidden rounded-card border border-white/10 shadow-2xl dark:border-white/5">
+      <div className="bg-black/5 px-4 pb-4 md:px-6 md:pb-8">
+        <article className="mx-auto w-full max-w-5xl animate-fade-in overflow-visible rounded-card border border-white/10 shadow-2xl dark:border-white/5">
           <LandingHeader
             clientName={client.name}
             mainLogoUrl={branding.mainLogoUrl}
@@ -69,7 +69,7 @@ export default async function ClientLandingPage({
               />
             ) : null}
           </div>
-        </div>
+        </article>
       </div>
     </div>
   );
