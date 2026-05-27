@@ -28,7 +28,8 @@ const branding = {
   heroTitle: "Agente Conversacional MetLife – Caja de compensación Colsubsidio",
   heroSubtitle:
     "Seguro voluntario de accidentes personales. Guía clara, profesional y confiable para que el cliente entienda el producto y tome una decisión informada.",
-  botUrl: null as string | null,
+  botUrl: (process.env.METLIFE_BOT_URL?.trim() || null) as string | null,
+  botButtonText: "Plataforma del Agente",
 };
 
 let row = db
@@ -72,6 +73,8 @@ if (row) {
         secondaryColor: branding.secondaryColor,
         templateId: METLIFE_TEMPLATE_ID,
         landingContent,
+        botButtonText: branding.botButtonText,
+        ...(branding.botUrl ? { botUrl: branding.botUrl } : {}),
       })
       .where(eq(clientBranding.clientId, row.id))
       .run();

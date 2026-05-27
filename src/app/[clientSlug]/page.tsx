@@ -2,6 +2,7 @@ import { getClientBySlug } from "@/server/actions/clients";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { LandingHero } from "@/components/landing/LandingHero";
 import { LandingRenderer } from "@/components/landing/LandingRenderer";
+import { LandingBotEmbed } from "@/components/landing/LandingBotEmbed";
 import type { TemplateId } from "@/types/landing-templates";
 
 export default async function ClientLandingPage({
@@ -51,6 +52,14 @@ export default async function ClientLandingPage({
               primaryColor={branding.primaryColor}
               secondaryColor={branding.secondaryColor}
             />
+            {branding.botUrl ? (
+              <LandingBotEmbed
+                botUrl={branding.botUrl}
+                title={branding.botButtonText}
+                primaryColor={branding.primaryColor}
+                secondaryColor={branding.secondaryColor}
+              />
+            ) : null}
           </div>
         </div>
       </div>
