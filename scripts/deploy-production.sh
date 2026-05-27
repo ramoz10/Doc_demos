@@ -19,6 +19,14 @@ echo "Commit: $(git log -1 --oneline)"
 echo "=== Alinear con origin/main (evita page.tsx corrupto en servidor) ==="
 git checkout origin/main -- 'src/app/[clientSlug]/page.tsx'
 
+echo "=== Quitar fuentes locales no versionadas en src/ (rompen npm run build) ==="
+untracked_src=$(git ls-files --others --exclude-standard 'src/**/*.tsx' 'src/**/*.ts' 2>/dev/null || true)
+if [ -n "$untracked_src" ]; then
+  echo "$untracked_src" | while read -r f; do
+    [ -n "$f" ] && echo "  eliminando $f" && rm -f "$f"
+  done
+fi
+
 echo "=== Verificar page.tsx antes del build ==="
 bash scripts/verify-build-ready.sh
 
