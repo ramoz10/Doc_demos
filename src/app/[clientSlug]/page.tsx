@@ -55,6 +55,7 @@ export default async function ClientLandingPage({
             {branding.botUrl ? (
               <LandingBotEmbed
                 botUrl={branding.botUrl}
+                clientSlug={client.slug}
                 title={branding.botButtonText}
                 primaryColor={branding.primaryColor}
                 secondaryColor={branding.secondaryColor}

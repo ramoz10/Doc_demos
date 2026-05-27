@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Demostración de Agentes</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --sura-blue: #16A34A;
+      --sura-blue-dark: #1F55C6;
+
+      --danger-red: #E11D48;
+      /* rojo brillante */
+      --danger-red-soft: rgba(225, 29, 72, 0.35);
+      /* rojo traslúcido */
+
+      --gray-900: #111827;
+      --gray-700: #374151;
+      --bg: #F7F9FF;
+      --card: #FFFFFF;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Montserrat", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 700px at 50% -200px, rgba(45, 109, 246, .18), transparent 60%), var(--bg);
+      color: var(--gray-900);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 16px;
+      text-align: center;
+    }
+
+    .shell {
+      width: min(980px, 100%);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      align-items: center;
+    }
+
+    header {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 0;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand img {
+      max-width: 180px;
+      height: auto;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.45rem, 2.5vw, 2.1rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .card {
+      width: min(560px, 100%);
+      background: var(--card);
+      border: 1px solid rgba(17, 24, 39, .08);
+      border-radius: 18px;
+      box-shadow: 0 18px 40px rgba(17, 24, 39, .08);
+      padding: 22px 20px 18px;
+    }
+
+    .hint {
+      font-size: 0.95rem;
+      color: rgba(55, 65, 81, .92);
+      margin: 0 0 10px;
+    }
+
+    /* Avatar */
+    .avatar-ring {
+      width: 180px;
+      height: 180px;
+      border-radius: 999px;
+      border: 3px solid rgba(45, 109, 246, 0.22);
+      display: grid;
+      place-items: center;
+      position: relative;
+      overflow: hidden;
+      background: #fff;
+      margin: 10px auto 14px;
+    }
+
+    .avatar-ring::before {
+      content: "";
+      position: absolute;
+      inset: -6px;
+      border-radius: 999px;
+      border: 6px solid transparent;
+      background: conic-gradient(from 0deg, var(--sura-blue), rgba(45, 109, 246, 0) 35%) border-box;
+      -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0;
+      animation: spin 1.4s linear infinite;
+      pointer-events: none;
+    }
+
+    .avatar-ring.active::before {
+      opacity: 1;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .avatar-photo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 999px;
+      display: block;
+    }
+
+    .avatar-label {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      font-size: 12px;
+      color: #333;
+    }
+
+    /* Controles */
+    .controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 6px 0 14px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .05s ease, filter .15s ease, background .15s ease, opacity .15s ease;
+      min-width: 170px;
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    /* ✅ Start button: azul normal, deshabilitado azul traslúcido */
+    #startButton {
+      background: var(--sura-blue);
+      color: white;
+    }
+
+    #startButton:hover {
+      filter: brightness(0.96);
+    }
+
+    #startButton:disabled {
+      background: rgba(22, 163, 74, .35);
+      color: rgba(255, 255, 255, 0.95);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ✅ Stop button: rojo brillante, deshabilitado rojo traslúcido */
+    #stopButton {
+      background: var(--danger-red);
+      color: #fff;
+    }
+
+    #stopButton:hover {
+      filter: brightness(0.96);
+    }
+
+    #stopButton:disabled {
+      background: var(--danger-red-soft);
+      color: rgba(255, 255, 255, 0.95);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .status {
+      display: grid;
+      gap: 6px;
+      font-size: 0.98rem;
+      color: var(--gray-700);
+      margin-top: 4px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(17, 24, 39, .10);
+      background: #fff;
+      width: fit-content;
+      margin: 0 auto;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: #9CA3AF;
+    }
+
+    .dot.connected {
+      background: #16A34A;
+    }
+
+    .dot.connecting {
+      background: #F59E0B;
+    }
+
+    .dot.error {
+      background: #DC2626;
+    }
+
+    footer {
+      font-size: 0.85rem;
+      color: rgba(55, 65, 81, .85);
+    }
+
+    /* --- Botón config (dentro del card) --- */
+    .config-trigger {
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      border: 1px solid rgba(17, 24, 39, .1);
+      cursor: pointer;
+      font-size: 20px;
+      background: #f3f4f6;
+      display: grid;
+      place-items: center;
+      transition: all 0.2s;
+    }
+
+    .config-trigger:hover {
+      background: #e5e7eb;
+    }
+
+    /* --- Agent Selector --- */
+    .agent-selector-wrapper.is-hidden {
+      display: none !important;
+    }
+
+    .agent-selector-wrapper {
+      margin: 15px 0 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .agent-selector-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--gray-700);
+    }
+
+    .agent-selector-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      max-width: 400px;
+      justify-content: center;
+    }
+
+    .agent-dropdown {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid #f97316;
+      /* Color naranja de la imagen */
+      background: #fff;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+      -webkit-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23f97316'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 16px;
+      padding-right: 36px;
+    }
+
+
+
+
+    /* --- Overlay --- */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(17, 24, 39, .35);
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      z-index: 9999;
+    }
+
+    .overlay.hidden {
+      display: none;
+    }
+
+    .overlay-panel {
+      width: min(1200px, 98vw);
+      height: min(92vh, 900px);
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 22px 70px rgba(17, 24, 39, .25);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .overlay-header {
+      padding: 16px 18px;
+      border-bottom: 1px solid rgba(17, 24, 39, .10);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      text-align: left;
+    }
+
+    .overlay-title {
+      font-weight: 800;
+      font-size: 1.05rem;
+    }
+
+    .overlay-subtitle {
+      font-size: .9rem;
+      color: rgba(55, 65, 81, .85);
+      margin-top: 2px;
+    }
+
+    /* ✅ X rojo */
+    .icon-btn {
+      border: 1px solid rgba(225, 29, 72, .35);
+      background: rgba(225, 29, 72, .10);
+      color: var(--danger-red);
+      border-radius: 10px;
+      padding: 8px 12px;
+      cursor: pointer;
+      min-width: 44px;
+      font-weight: 900;
+    }
+
+    .icon-btn:hover {
+      background: rgba(225, 29, 72, .16);
+    }
+
+    /* ✅ Regresamos scroll aquí */
+    .overlay-body {
+      padding: 16px 18px;
+      overflow: auto;
+      /* ✅ scrollbar vertical */
+      height: 100%;
+    }
+
+    .grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+      text-align: left;
+    }
+
+    .field span {
+      font-weight: 700;
+      font-size: .92rem;
+      color: rgba(17, 24, 39, .85);
+    }
+
+    .field textarea,
+    .field input,
+    .field select {
+      width: 100%;
+      border: 1px solid rgba(17, 24, 39, .14);
+      border-radius: 10px;
+      padding: 10px 10px;
+      font-family: inherit;
+      font-size: .95rem;
+      outline: none;
+      background: #fff;
+    }
+
+    .field textarea {
+      resize: vertical;
+    }
+
+    #cfgFirstMessage {
+      min-height: 90px;
+    }
+
+    #cfgSystemPrompt {
+      min-height: 260px;
+    }
+
+    .row2 {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .row3 {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    @media (min-width: 980px) {
+      .grid {
+        grid-template-columns: 1fr 1fr;
+        align-items: start;
+      }
+
+      .field.firstmessage {
+        grid-column: 1 / -1;
+      }
+
+      .field.systemprompt {
+        grid-column: 1 / -1;
+      }
+    }
+
+    .overlay-footer {
+      padding: 14px 18px;
+      border-top: 1px solid rgba(17, 24, 39, .10);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .btn-primary {
+      background: var(--sura-blue);
+      color: #fff;
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-weight: 800;
+      cursor: pointer;
+      min-width: 140px;
+    }
+
+    .btn-primary:hover {
+      background: var(--sura-blue-dark);
+    }
+
+    .overlay-status {
+      font-size: .92rem;
+      color: rgba(55, 65, 81, .9);
+      padding-top: 2px;
+    }
+
+    /* --- Pantalla de error --- */
+    .cfg-error {
+      height: 100%;
+      display: grid;
+      place-items: center;
+      padding: 14px 0;
+    }
+
+    .cfg-error.hidden {
+      display: none;
+    }
+
+    .cfg-error-card {
+      width: min(640px, 100%);
+      border: 1px solid rgba(17, 24, 39, .12);
+      border-radius: 14px;
+      padding: 16px;
+      background: #fff;
+      box-shadow: 0 12px 30px rgba(17, 24, 39, .10);
+      text-align: left;
+    }
+
+    .cfg-error-title {
+      font-weight: 900;
+      font-size: 1.05rem;
+      margin-bottom: 8px;
+    }
+
+    .cfg-error-msg {
+      color: rgba(55, 65, 81, .92);
+      font-size: .95rem;
+      white-space: pre-wrap;
+    }
+
+    .cfg-error-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .btn-danger {
+      background: var(--danger-red);
+      color: #fff;
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-weight: 800;
+      cursor: pointer;
+      min-width: 140px;
+    }
+
+    .btn-danger:hover {
+      filter: brightness(.96);
+    }
+
+    .btn-ghost {
+      background: #F3F4F6;
+      border: 1px solid rgba(17, 24, 39, .10);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-weight: 800;
+      cursor: pointer;
+      min-width: 140px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="shell">
+    <header>
+      <div class="brand">
+        <img src="/sura-logo.png" alt="SURA" onerror="this.style.display='none'">
+        <h1>Centro de pruebas de Voice Bots</h1>
+      </div>
+    </header>
+
+    <section class="card" aria-label="Controles de llamada">
+      <p class="hint">Inicia una sesión de voz con un agente de atención al cliente.</p>
+
+      <div class="avatar-ring" id="avatarRing">
+        <img class="avatar-photo" src="/sura-agente.jpg" alt="Agente SURA" onerror="this.src='/agente.jpg'">
+        <div class="avatar-label">Voice Bot Prymenet</div>
+      </div>
+
+      <div class="controls">
+        <button id="startButton">Iniciar llamada</button>
+        <button id="stopButton" disabled>Colgar</button>
+      </div>
+
+      <div class="agent-selector-wrapper">
+        <span class="agent-selector-label">Selecciona un Agente</span>
+        <div class="agent-selector-container">
+          <select id="agentSelector" class="agent-dropdown">
+            <option value="">Cargando agentes...</option>
+          </select>
+          <button id="openConfigBtn" class="config-trigger" title="Configuración">⚙️</button>
+        </div>
+      </div>
+
+      <div class="status">
+        <div class="pill">
+          <span class="dot" id="statusDot"></span>
+          <span><strong>Estado:</strong> <span id="connectionStatus">Desconectado</span></span>
+        </div>
+        <div class="pill">
+          <span><strong>Agente:</strong> <span id="agentStatus">idle</span></span>
+        </div>
+      </div>
+    </section>
+
+    <footer>⚠️ El navegador te pedirá permiso para usar el micrófono.</footer>
+  </div>
+
+  </div>
+
+  <!-- Overlay Config -->
+  <div id="configOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-label="Configuración del agente">
+    <div class="overlay-panel">
+      <div class="overlay-header">
+        <div>
+          <div class="overlay-title">Configuración del agente</div>
+          <div class="overlay-subtitle">Edita y publica cambios al agente de Nubacom</div>
+        </div>
+        <button id="closeConfigBtn" class="icon-btn" aria-label="Cerrar">✕</button>
+      </div>
+
+      <div class="overlay-body">
+        <!-- Formulario -->
+        <div class="grid" id="cfgForm">
+          <label class="field firstmessage">
+            <span>First message</span>
+            <textarea id="cfgFirstMessage" rows="3" placeholder="Mensaje inicial del agente..."></textarea>
+          </label>
+
+          <label class="field systemprompt">
+            <span>System prompt</span>
+            <textarea id="cfgSystemPrompt" rows="10" placeholder="Prompt del sistema..."></textarea>
+          </label>
+
+          <div class="row2">
+            <label class="field">
+              <span>Lenguaje</span>
+              <select id="cfgLanguage">
+                <option value="es">es (Spanish)</option>
+                <option value="en">en (English)</option>
+                <option value="pt">pt (Portuguese)</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Voz</span>
+              <select id="cfgVoice"></select>
+            </label>
+          </div>
+
+          <div class="row3">
+            <label class="field">
+              <span>Temperatura</span>
+              <input id="cfgTemperature" type="number" step="0.1" min="0" max="2" placeholder="0.2" />
+            </label>
+
+            <label class="field">
+              <span>Take turn after silence (seg)</span>
+              <input id="cfgTurnTimeout" type="number" step="1" min="1" max="30" placeholder="7" />
+            </label>
+
+            <label class="field">
+              <span>End conversation after silence (seg)</span>
+              <input id="cfgSilenceEndCall" type="number" step="1" min="-1" max="600" placeholder="-1 (desactivado)" />
+            </label>
+          </div>
+
+          <label class="field">
+            <span>Max conversation duration (seg)</span>
+            <input id="cfgMaxDuration" type="number" step="10" min="60" max="7200" placeholder="600" />
+          </label>
+
+          <div class="overlay-status" id="cfgStatus"></div>
+        </div>
+
+        <!-- Pantalla de error -->
+        <div id="cfgErrorScreen" class="cfg-error hidden">
+          <div class="cfg-error-card">
+            <div class="cfg-error-title">No se pudieron aplicar los cambios</div>
+            <div id="cfgErrorMessage" class="cfg-error-msg"></div>
+            <div class="cfg-error-actions">
+              <button id="cfgRetryBtn" class="btn-primary">Reintentar</button>
+              <button id="cfgBackBtn" class="btn-ghost">Volver a configuración</button>
+              <button id="cfgCloseErrorBtn" class="btn-danger">Cerrar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="overlay-footer">
+        <button id="applyConfigBtn" class="btn-primary">Aplicar</button>
+        <!-- ✅ Quitado: botón Regresar -->
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { Conversation } from 'https://esm.sh/@elevenlabs/client@0.4.0';
+
+    // --- UI principal ---
+    const startButton = document.getElementById('startButton');
+    const stopButton = document.getElementById('stopButton');
+    const connectionStatus = document.getElementById('connectionStatus');
+    const agentStatus = document.getElementById('agentStatus');
+    const statusDot = document.getElementById('statusDot');
+    const avatarRing = document.getElementById('avatarRing');
+
+    const agentSelector = document.getElementById('agentSelector');
+    const pageParams = new URLSearchParams(window.location.search);
+    const METLIFE_3_AGENT_ID = 'agent_7501kjwm6f17fter0d3886rt38x0';
+    const LOCKED_AGENT_ID =
+      pageParams.get('agent_id') ||
+      (pageParams.get('lock') === 'metlife' ? METLIFE_3_AGENT_ID : '');
+    const HIDE_AGENT_SELECTOR =
+      pageParams.get('hide_selector') !== '0' && !!LOCKED_AGENT_ID;
+    let selectedAgentId = LOCKED_AGENT_ID || '';
+    let conversation = null;
+
+    function setConn(status, label) {
+      connectionStatus.textContent = label;
+      statusDot.className = 'dot ' + status;
+    }
+
+    async function getSignedUrl() {
+      const url = new URL('/api/signed-url', window.location.origin);
+      if (selectedAgentId) url.searchParams.set('agent_id', selectedAgentId);
+
+      const res = await fetch(url, { method: 'GET' });
+      if (!res.ok) {
+        const txt = await res.text().catch(() => '');
+        throw new Error(txt || 'No se pudo obtener signed_url del servidor');
+      }
+      return (await res.text()).trim();
+    }
+
+    async function startSession() {
+      try {
+        setConn('connecting', 'Conectando...');
+        agentStatus.textContent = 'idle';
+
+        if (!navigator.mediaDevices?.getUserMedia) {
+          throw new Error('Este navegador/entorno no soporta micrófono (getUserMedia).');
+        }
+
+        // deshabilita start mientras conecta
+        startButton.disabled = true;
+
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+
+        const signedUrl = await getSignedUrl();
+
+        conversation = await Conversation.startSession({
+          signedUrl,
+          connectionType: 'websocket',
+          onConnect: () => {
+            setConn('connected', 'Conectado');
+            startButton.disabled = true;
+            stopButton.disabled = false;
+          },
+          onDisconnect: () => {
+            setConn('', 'Desconectado');
+            startButton.disabled = false;
+            stopButton.disabled = true;
+            agentStatus.textContent = 'idle';
+            avatarRing.classList.remove('active');
+            conversation = null;
+          },
+          onError: (err) => {
+            console.error(err);
+            setConn('error', 'Error');
+            // permite reintentar
+            startButton.disabled = false;
+            stopButton.disabled = true;
+          },
+          onModeChange: (mode) => {
+            const m = mode?.mode ?? 'idle';
+            agentStatus.textContent = m;
+            if (m === 'speaking') avatarRing.classList.add('active');
+            else avatarRing.classList.remove('active');
+          },
+        });
+
+      } catch (err) {
+        console.error(err);
+        setConn('error', 'Error');
+        startButton.disabled = false;
+        stopButton.disabled = true;
+      }
+    }
+
+    async function stopSession() {
+      try {
+        stopButton.disabled = true;
+        if (conversation) {
+          await conversation.endSession();
+        }
+      } finally {
+        conversation = null;
+        startButton.disabled = false;
+        stopButton.disabled = true;
+        avatarRing.classList.remove('active');
+        setConn('', 'Desconectado');
+        agentStatus.textContent = 'idle';
+      }
+    }
+
+    startButton.addEventListener('click', startSession);
+    stopButton.addEventListener('click', stopSession);
+
+    // --- Config Overlay ---
+    const openConfigBtn = document.getElementById('openConfigBtn');
+    const closeConfigBtn = document.getElementById('closeConfigBtn');
+    const applyConfigBtn = document.getElementById('applyConfigBtn');
+    const configOverlay = document.getElementById('configOverlay');
+
+    const cfgForm = document.getElementById('cfgForm');
+    const cfgStatus = document.getElementById('cfgStatus');
+
+    const cfgFirstMessage = document.getElementById('cfgFirstMessage');
+    const cfgSystemPrompt = document.getElementById('cfgSystemPrompt');
+    const cfgLanguage = document.getElementById('cfgLanguage');
+    const cfgVoice = document.getElementById('cfgVoice');
+    const cfgTemperature = document.getElementById('cfgTemperature');
+    const cfgTurnTimeout = document.getElementById('cfgTurnTimeout');
+    const cfgSilenceEndCall = document.getElementById('cfgSilenceEndCall');
+    const cfgMaxDuration = document.getElementById('cfgMaxDuration');
+
+    const cfgErrorScreen = document.getElementById('cfgErrorScreen');
+    const cfgErrorMessage = document.getElementById('cfgErrorMessage');
+    const cfgRetryBtn = document.getElementById('cfgRetryBtn');
+    const cfgBackBtn = document.getElementById('cfgBackBtn');
+    const cfgCloseErrorBtn = document.getElementById('cfgCloseErrorBtn');
+
+    let currentAgent = null;
+    let voicesCache = [];
+
+    function showOverlay(show) {
+      if (show) configOverlay.classList.remove('hidden');
+      else configOverlay.classList.add('hidden');
+    }
+
+    function setCfgMsg(msg) { cfgStatus.textContent = msg || ''; }
+
+    function showCfgForm() {
+      cfgErrorScreen.classList.add('hidden');
+      cfgForm.style.display = '';
+    }
+
+    function showCfgError(message) {
+      cfgForm.style.display = 'none';
+      cfgErrorScreen.classList.remove('hidden');
+      cfgErrorMessage.textContent = message || 'Error desconocido';
+    }
+
+    async function fetchJSON(url, opts) {
+      const r = await fetch(url, opts);
+      const t = await r.text().catch(() => '');
+      if (!r.ok) throw new Error(t || `HTTP ${r.status}`);
+      try { return JSON.parse(t); } catch { return t; }
+    }
+
+    function safeGet(obj, path, fallback = '') {
+      return path.split('.').reduce((acc, k) => (acc && acc[k] !== undefined ? acc[k] : undefined), obj) ?? fallback;
+    }
+
+    async function loadVoices() {
+      const data = await fetchJSON('/api/voices');
+      voicesCache = Array.isArray(data?.voices) ? data.voices : [];
+    }
+
+    function fillVoiceSelect(selectedVoiceId) {
+      cfgVoice.innerHTML = '';
+      const opt0 = document.createElement('option');
+      opt0.value = '';
+      opt0.textContent = '— Selecciona una voz —';
+      cfgVoice.appendChild(opt0);
+
+      voicesCache.forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v.voice_id;
+        opt.textContent = `${v.name || v.voice_id}`;
+        if (v.voice_id === selectedVoiceId) opt.selected = true;
+        cfgVoice.appendChild(opt);
+      });
+    }
+
+    async function loadAgentConfig() {
+      const url = new URL('/api/agent', window.location.origin);
+      if (selectedAgentId) url.searchParams.set('agent_id', selectedAgentId);
+
+      const agent = await fetchJSON(url);
+      currentAgent = agent;
+
+      const cc = agent.conversation_config || {};
+
+      cfgFirstMessage.value = safeGet(cc, 'agent.first_message', safeGet(cc, 'agent.firstMessage', ''));
+
+      cfgSystemPrompt.value =
+        safeGet(cc, 'agent.prompt.prompt', '') ||
+        safeGet(cc, 'agent.system_prompt', '') ||
+        safeGet(cc, 'agent.systemPrompt', '');
+
+      cfgLanguage.value = safeGet(cc, 'agent.language', 'es');
+
+      cfgTemperature.value =
+        safeGet(cc, 'agent.prompt.temperature', '') ??
+        safeGet(cc, 'llm.temperature', '');
+
+      const voiceId =
+        safeGet(cc, 'tts.voice_id', '') ||
+        safeGet(cc, 'tts.voiceId', '');
+
+      fillVoiceSelect(voiceId);
+
+      cfgTurnTimeout.value =
+        safeGet(cc, 'turn.turn_timeout', '') ||
+        safeGet(cc, 'turn.take_turn_after_silence_seconds', '');
+
+      cfgSilenceEndCall.value =
+        safeGet(cc, 'turn.silence_end_call_timeout', '') ||
+        safeGet(cc, 'turn.end_conversation_after_silence_seconds', '');
+
+      cfgMaxDuration.value =
+        safeGet(cc, 'conversation.max_duration_seconds', '') ||
+        safeGet(cc, 'conversation.max_conversation_duration_seconds', '');
+    }
+
+    function cleanUndefined(o) {
+      if (Array.isArray(o)) return o.map(cleanUndefined);
+      if (o && typeof o === 'object') {
+        const out = {};
+        for (const [k, v] of Object.entries(o)) {
+          if (v === undefined) continue;
+          const cv = cleanUndefined(v);
+          if (cv === undefined) continue;
+          out[k] = cv;
+        }
+        return out;
+      }
+      return o;
+    }
+
+    function numOrUndef(val) {
+      if (val === '' || val === null || val === undefined) return undefined;
+      const n = Number(val);
+      return Number.isFinite(n) ? n : undefined;
+    }
+
+    function buildPatchPayload() {
+      const payload = {
+        conversation_config: {
+          agent: {
+            first_message: cfgFirstMessage.value || '',
+            language: cfgLanguage.value || 'es',
+            prompt: {
+              prompt: cfgSystemPrompt.value || '',
+              temperature: numOrUndef(cfgTemperature.value),
+            }
+          },
+          tts: {
+            voice_id: cfgVoice.value || safeGet(currentAgent, 'conversation_config.tts.voice_id', '')
+          },
+          turn: {
+            turn_timeout: numOrUndef(cfgTurnTimeout.value),
+            silence_end_call_timeout: numOrUndef(cfgSilenceEndCall.value),
+          },
+          conversation: {
+            max_duration_seconds: numOrUndef(cfgMaxDuration.value),
+          }
+        }
+      };
+
+      return cleanUndefined(payload);
+    }
+
+    async function applyConfig() {
+      setCfgMsg('Aplicando cambios...');
+      applyConfigBtn.disabled = true;
+
+      try {
+        // cuelga sesión activa antes de aplicar
+        if (conversation) {
+          await conversation.endSession();
+          conversation = null;
+          startButton.disabled = false;
+          stopButton.disabled = true;
+        }
+
+        const payload = buildPatchPayload();
+
+        const url = new URL('/api/agent', window.location.origin);
+        if (selectedAgentId) url.searchParams.set('agent_id', selectedAgentId);
+
+        const updated = await fetchJSON(url, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        currentAgent = updated;
+
+        // ✅ ÉXITO: cerrar overlay y regresar a pantalla principal
+        setCfgMsg('');
+        showCfgForm();
+        showOverlay(false);
+
+      } catch (err) {
+        console.error(err);
+        setCfgMsg('');
+        showCfgError(err?.message || String(err));
+      } finally {
+        applyConfigBtn.disabled = false;
+      }
+    }
+
+    openConfigBtn.addEventListener('click', async () => {
+      try {
+        showCfgForm();
+        setCfgMsg('Cargando configuración...');
+        showOverlay(true);
+        await loadVoices();
+        await loadAgentConfig();
+        setCfgMsg('');
+      } catch (err) {
+        console.error(err);
+        showCfgError(err?.message || String(err));
+      }
+    });
+
+    closeConfigBtn.addEventListener('click', () => showOverlay(false));
+    applyConfigBtn.addEventListener('click', applyConfig);
+
+    cfgRetryBtn.addEventListener('click', () => applyConfig());
+    cfgBackBtn.addEventListener('click', () => showCfgForm());
+    cfgCloseErrorBtn.addEventListener('click', () => showOverlay(false));
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !configOverlay.classList.contains('hidden')) showOverlay(false);
+    });
+
+    async function loadAgents() {
+      try {
+        const data = await fetchJSON('/api/agents');
+        const agents = Array.isArray(data?.agents) ? data.agents : [];
+
+        agentSelector.innerHTML = '';
+        if (agents.length === 0) {
+          const opt = document.createElement('option');
+          opt.value = '';
+          opt.textContent = 'No se encontraron agentes';
+          agentSelector.appendChild(opt);
+          return;
+        }
+
+        const wrapper = document.querySelector('.agent-selector-wrapper');
+
+        if (HIDE_AGENT_SELECTOR && LOCKED_AGENT_ID) {
+          const locked = agents.find((a) => a.agent_id === LOCKED_AGENT_ID);
+          const opt = document.createElement('option');
+          opt.value = LOCKED_AGENT_ID;
+          opt.textContent = locked?.name || 'Metlife 3';
+          agentSelector.appendChild(opt);
+          selectedAgentId = LOCKED_AGENT_ID;
+          agentSelector.value = LOCKED_AGENT_ID;
+          wrapper?.classList.add('is-hidden');
+          return;
+        }
+
+        agents.forEach(a => {
+          const opt = document.createElement('option');
+          opt.value = a.agent_id;
+          opt.textContent = a.name;
+          agentSelector.appendChild(opt);
+        });
+
+        if (LOCKED_AGENT_ID && agents.some((a) => a.agent_id === LOCKED_AGENT_ID)) {
+          selectedAgentId = LOCKED_AGENT_ID;
+          agentSelector.value = LOCKED_AGENT_ID;
+        } else {
+          selectedAgentId = agents[0].agent_id;
+          agentSelector.value = selectedAgentId;
+        }
+      } catch (err) {
+        console.error('Error cargando agentes:', err);
+        agentSelector.innerHTML = '<option value="">Error al cargar agentes</option>';
+      }
+    }
+
+    agentSelector.addEventListener('change', async () => {
+      selectedAgentId = agentSelector.value;
+      // Si el overlay está abierto, recargar la config del nuevo agente
+      if (!configOverlay.classList.contains('hidden')) {
+        try {
+          setCfgMsg('Cargando configuración del nuevo agente...');
+          await loadAgentConfig();
+          setCfgMsg('');
+        } catch (err) {
+          showCfgError(err?.message || String(err));
+        }
+      }
+    });
+
+    // Estado inicial
+    setConn('', 'Desconectado');
+    agentStatus.textContent = 'idle';
+    loadAgents();
+  </script>
+</body>
+
+</html>
