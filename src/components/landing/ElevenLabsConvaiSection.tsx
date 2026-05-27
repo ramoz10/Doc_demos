@@ -60,7 +60,7 @@ export function ElevenLabsConvaiSection({
 
     let cancelled = false;
     let retries = 0;
-    const maxRetries = 60;
+    const maxRetries = 80;
     const checkWidgetApi = () => {
       if (cancelled) return;
       const widget = widgetRef.current as
@@ -70,7 +70,7 @@ export function ElevenLabsConvaiSection({
           })
         | null;
 
-      if (widget?.startConversation && widget?.endConversation) {
+      if (widget && (widget.shadowRoot || customElements.get("elevenlabs-convai"))) {
         setIsReady(true);
         setErrorMsg(null);
         return;
@@ -104,6 +104,17 @@ export function ElevenLabsConvaiSection({
     };
   }, [scriptLoaded]);
 
+  const clickWidgetButton = (matcher: (text: string, btn: HTMLButtonElement) => boolean) => {
+    const node = widgetRef.current as HTMLElement | null;
+    const root = node?.shadowRoot;
+    if (!root) return false;
+    const buttons = Array.from(root.querySelectorAll("button")) as HTMLButtonElement[];
+    const target = buttons.find((btn) => matcher((btn.textContent || "").trim().toLowerCase(), btn));
+    if (!target) return false;
+    target.click();
+    return true;
+  };
+
   const handleStartCall = async () => {
     setErrorMsg(null);
     setIsStartingCall(true);
@@ -129,7 +140,19 @@ export function ElevenLabsConvaiSection({
       }
 
       node.setAttribute("signed-url", body.signedUrl);
-      node.startConversation();
+      // Preferimos API directa si existe; fallback a click en botón interno del widget.
+      if (typeof node.startConversation === "function") {
+        node.startConversation();
+      } else {
+        const clicked = clickWidgetButton((text) =>
+          text.includes("start call") ||
+          text.includes("iniciar llamada") ||
+          text.includes("begin conversation"),
+        );
+        if (!clicked) {
+          throw new Error("No se encontró el botón interno de inicio del widget.");
+        }
+      }
     } catch (error) {
       const msg =
         error instanceof Error
@@ -145,8 +168,16 @@ export function ElevenLabsConvaiSection({
     const node = widgetRef.current as
       | (HTMLElement & { endConversation?: () => void })
       | null;
-    if (!node?.endConversation) return;
-    node.endConversation();
+    if (!node) return;
+    if (typeof node.endConversation === "function") {
+      node.endConversation();
+      return;
+    }
+    clickWidgetButton((text) =>
+      text.includes("end call") ||
+      text.includes("colgar") ||
+      text.includes("end conversation"),
+    );
   };
 
   return (
