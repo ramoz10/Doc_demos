@@ -11,6 +11,8 @@ interface LandingHeaderProps {
   botButtonText: string | null;
   botUrl2: string | null;
   botButtonText2: string | null;
+  /** Ignorado: el template solo usa LandingRenderer. Evita fallos de build si page.tsx lo pasa por error. */
+  templateId?: string;
 }
 
 export function LandingHeader({
@@ -23,6 +25,7 @@ export function LandingHeader({
   botButtonText,
   botUrl2,
   botButtonText2,
+  templateId: _templateId,
 }: LandingHeaderProps) {
   return (
     <LandingHeaderClient

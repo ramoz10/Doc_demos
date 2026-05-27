@@ -16,8 +16,15 @@ git checkout main
 git pull origin main
 echo "Commit: $(git log -1 --oneline)"
 
+echo "=== Alinear con origin/main (evita page.tsx corrupto en servidor) ==="
+git checkout origin/main -- 'src/app/[clientSlug]/page.tsx'
+
+echo "=== Verificar page.tsx antes del build ==="
+bash scripts/verify-build-ready.sh
+
 echo "=== Dependencias y build ==="
 npm ci
+rm -rf .next
 npm run build
 
 echo "=== SQLite: MetLife (hero + guía desde src/content) ==="
@@ -27,10 +34,20 @@ echo "=== SQLite: resto de landings con guías en código ==="
 npm run db:migrate-landing-templates
 
 echo "=== PM2 ==="
+if [ ! -f ".next/BUILD_ID" ]; then
+  echo "ERROR: no existe .next/BUILD_ID — el build falló o no se ejecutó."
+  exit 1
+fi
 if command -v pm2 >/dev/null 2>&1; then
-  pm2 restart doc-demos 2>/dev/null || pm2 start npx --name doc-demos -- next start -p 3000
+  pm2 delete doc-demos 2>/dev/null || true
+  pm2 start ecosystem.config.cjs
   pm2 save
+  sleep 3
   pm2 status
+  if ! pm2 jlist 2>/dev/null | grep -q '"status":"online"'; then
+    echo "PM2 no quedó estable. Revisa: pm2 logs doc-demos --lines 80"
+    exit 1
+  fi
 else
   echo "pm2 no está en PATH; reinicia doc-demos manualmente."
 fi
