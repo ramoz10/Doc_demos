@@ -119,42 +119,40 @@ export function ElevenLabsConvaiSection({
       aria-label={title || "Centro de pruebas de Voice Bots"}
     >
       <div
-        className="mx-auto max-w-[760px] rounded-[2rem] px-5 py-10 md:px-10 md:py-12"
+        className="mx-auto max-w-[520px] rounded-2xl px-4 py-6 md:px-6 md:py-8"
         style={{
           background:
-            "radial-gradient(1200px 700px at 50% -200px, rgba(45, 109, 246, 0.16), transparent 60%), #f7f9ff",
+            "radial-gradient(800px 480px at 50% -120px, rgba(45, 109, 246, 0.14), transparent 60%), #f7f9ff",
         }}
       >
         {/* Marca PrymeNet */}
-        <header className="mb-6 flex flex-col items-center text-center">
-          <div className="mb-2 overflow-hidden rounded-xl bg-black px-4 py-3">
-            <Image
-              src={METLIFE_PRYMENET_LOGO}
-              alt="PrymeNet — Tecnología trabajando para ti"
-              width={320}
-              height={74}
-              className="h-auto w-[min(100%,320px)] object-contain"
-              priority
-            />
-          </div>
+        <header className="mb-4 flex flex-col items-center text-center">
+          <Image
+            src={METLIFE_PRYMENET_LOGO}
+            alt="PrymeNet — Tecnología trabajando para ti"
+            width={240}
+            height={55}
+            className="h-auto w-[min(100%,240px)] object-contain"
+            priority
+          />
           <h2
-            className="mt-5 text-balance text-[2.05rem] font-extrabold leading-tight tracking-tight md:text-[3.05rem]"
+            className="mt-3 text-balance text-lg font-bold leading-snug tracking-tight md:text-xl"
             style={{ color: secondaryColor }}
           >
             Centro de pruebas de Voice Bots
           </h2>
         </header>
 
-        {/* Tarjeta blanca (misma jerarquía visual que PrymeNet) */}
-        <div className="rounded-[1.35rem] bg-white px-6 py-8 shadow-[0_20px_50px_-12px_rgba(15,23,42,0.12)] ring-1 ring-slate-900/5 md:px-10 md:py-10">
-          <p className="mb-8 text-center text-[1.02rem] leading-relaxed text-slate-600">
+        {/* Tarjeta blanca (agente + controles) */}
+        <div className="rounded-xl bg-white px-4 py-5 shadow-[0_12px_32px_-10px_rgba(15,23,42,0.1)] ring-1 ring-slate-900/5 md:px-6 md:py-6">
+          <p className="mb-4 text-center text-sm leading-relaxed text-slate-600">
             Inicia una sesión de voz con un agente de atención al cliente.
           </p>
 
-          {/* Avatar circular + badge (look PrymeNet) */}
-          <div className="relative mx-auto mb-8 flex w-fit flex-col items-center">
+          {/* Avatar circular + badge */}
+          <div className="relative mx-auto mb-5 flex w-fit flex-col items-center">
             <div
-              className="relative h-44 w-44 overflow-hidden rounded-full border-2 md:h-52 md:w-52"
+              className="relative h-28 w-28 overflow-hidden rounded-full border-2 md:h-32 md:w-32"
               style={{
                 borderColor: `${brandBlue}55`,
                 background: `linear-gradient(160deg, ${brandBlue}22 0%, #e2e8f0 100%)`,
@@ -165,24 +163,24 @@ export function ElevenLabsConvaiSection({
                 alt="Agente de atención MetLife"
                 fill
                 className="object-cover object-top"
-                sizes="(max-width: 768px) 176px, 208px"
+                sizes="(max-width: 768px) 112px, 128px"
               />
             </div>
-            <span className="absolute bottom-0 left-1/2 z-[1] -translate-x-1/2 translate-y-1/2 whitespace-nowrap rounded-full border border-slate-200/80 bg-white px-3 py-1 text-[11px] font-semibold text-slate-800 shadow-sm md:text-xs">
+            <span className="absolute bottom-0 left-1/2 z-[1] -translate-x-1/2 translate-y-1/2 whitespace-nowrap rounded-full border border-slate-200/80 bg-white px-2.5 py-0.5 text-[10px] font-semibold text-slate-800 shadow-sm">
               Voice Bot PrymeNet
             </span>
           </div>
 
-          <p className="mb-4 text-center text-[11px] text-amber-900/85 md:text-xs">
+          <p className="mb-3 text-center text-[10px] text-amber-900/85 md:text-[11px]">
             ⚠️ El navegador te pedirá permiso para usar el micrófono.
           </p>
 
-          <div className="mb-5 flex items-center justify-center gap-3">
+          <div className="mb-4 flex flex-wrap items-center justify-center gap-2">
             <button
               type="button"
               onClick={handleStartCall}
               disabled={isInCall || isStartingCall}
-              className="inline-flex h-12 min-w-[170px] items-center justify-center rounded-[12px] px-6 text-sm font-extrabold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-10 min-w-[140px] items-center justify-center rounded-[10px] px-4 text-xs font-extrabold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
               style={{ backgroundColor: startGreen }}
             >
               {isStartingCall ? "Conectando..." : "Iniciar llamada"}
@@ -191,7 +189,7 @@ export function ElevenLabsConvaiSection({
               type="button"
               onClick={handleEndCall}
               disabled={!isInCall}
-              className="inline-flex h-12 min-w-[170px] items-center justify-center rounded-[12px] px-6 text-sm font-extrabold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-10 min-w-[140px] items-center justify-center rounded-[10px] px-4 text-xs font-extrabold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
               style={{ backgroundColor: hangPink }}
             >
               Colgar
