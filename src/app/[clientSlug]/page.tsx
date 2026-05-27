@@ -40,7 +40,7 @@ export default async function ClientLandingPage({
             botButtonText2={branding.botButtonText2}
             hideBotButtons={client.slug === "metlife-seguros"}
           />
-          <div className="p-8 pt-20 md:pt-16">
+          <div className="p-8">
             <LandingHero
               heroTitle={branding.heroTitle}
               heroSubtitle={branding.heroSubtitle}
