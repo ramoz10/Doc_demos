@@ -37,11 +37,19 @@ export function ElevenLabsConvaiSection({
   const brandBlue = primaryColor || "#2d6df6";
   const startGreen = "#2aad57";
   const hangPink = "#e8adbf";
+  const widgetElementId = "metlife-convai-widget-hidden";
+
+  useEffect(() => {
+    const existing = customElements.get("elevenlabs-convai");
+    if (existing) setScriptLoaded(true);
+  }, []);
 
   useEffect(() => {
     if (!scriptLoaded) return;
-    const node = widgetRef.current;
+    const node = (document.getElementById(widgetElementId) ||
+      widgetRef.current) as HTMLElement | null;
     if (!node) return;
+    widgetRef.current = node;
 
     const onStarted = () => setIsInCall(true);
     const onEnded = () => setIsInCall(false);
@@ -234,12 +242,13 @@ export function ElevenLabsConvaiSection({
             </p>
           ) : null}
 
-          {/* Widget oculto: usamos su API JS y controles propios del landing */}
+          {/* Widget oculto (offscreen): usamos su API JS y controles propios del landing */}
           <div
-            className="h-0 overflow-hidden opacity-0 pointer-events-none"
+            className="pointer-events-none absolute -left-[9999px] top-auto h-[420px] w-[320px] overflow-hidden opacity-0"
             aria-hidden
           >
             {createElement("elevenlabs-convai", {
+              id: widgetElementId,
               "agent-id": agentId,
               ref: (el: Element | null) => {
                 widgetRef.current = el as HTMLElement | null;
