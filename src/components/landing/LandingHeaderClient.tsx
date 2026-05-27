@@ -35,10 +35,10 @@ export function LandingHeaderClient({
   hideBotButtons = false,
 }: LandingHeaderClientProps) {
   return (
-    <header
-      className="relative min-h-16 border-b border-white/10 py-3 backdrop-blur-xl md:h-16 md:py-0"
+    <div
+      role="banner"
+      className="landing-nav-bar min-h-16 border-b border-white/10 py-3 md:h-16 md:py-0"
       style={{
-        position: "static",
         backgroundColor: `${secondaryColor}ee`,
       }}
     >
@@ -124,6 +124,6 @@ export function LandingHeaderClient({
           )}
         </div>
       </nav>
-    </header>
+    </div>
   );
 }

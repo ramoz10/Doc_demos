@@ -37,7 +37,7 @@ export default async function ClientLayout({ children, params }: Props) {
 
   return (
     <div
-      className="min-h-screen"
+      className="min-h-screen bg-black/5 px-4 pb-4 pt-0 md:px-6 md:pb-8"
       style={
         {
           "--client-primary": primaryColor,

@@ -30,6 +30,13 @@ fi
 echo "=== Verificar page.tsx antes del build ==="
 bash scripts/verify-build-ready.sh
 
+echo "=== Verificar que el header no use sticky/fixed ==="
+if grep -E 'sticky|fixed|top-0' src/components/landing/LandingHeaderClient.tsx; then
+  echo "ERROR: LandingHeaderClient no debe usar position sticky/fixed."
+  exit 1
+fi
+echo "OK: header en flujo normal del documento."
+
 echo "=== Dependencias y build ==="
 npm ci
 rm -rf .next
