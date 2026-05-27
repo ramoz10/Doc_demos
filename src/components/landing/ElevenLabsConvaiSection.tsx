@@ -32,11 +32,14 @@ export function ElevenLabsConvaiSection({
   const widgetRef = useRef<HTMLElement | null>(null);
   const [isInCall, setIsInCall] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [scriptLoaded, setScriptLoaded] = useState(false);
   const brandBlue = primaryColor || "#2d6df6";
   const startGreen = "#2aad57";
   const hangPink = "#e8adbf";
 
   useEffect(() => {
+    if (!scriptLoaded) return;
     const node = widgetRef.current;
     if (!node) return;
 
@@ -45,26 +48,71 @@ export function ElevenLabsConvaiSection({
 
     node.addEventListener("conversationStarted", onStarted);
     node.addEventListener("conversationEnded", onEnded);
-    setIsReady(true);
+
+    let cancelled = false;
+    let retries = 0;
+    const maxRetries = 60;
+    const checkWidgetApi = () => {
+      if (cancelled) return;
+      const widget = widgetRef.current as
+        | (HTMLElement & {
+            startConversation?: () => void;
+            endConversation?: () => void;
+          })
+        | null;
+
+      if (widget?.startConversation && widget?.endConversation) {
+        setIsReady(true);
+        setErrorMsg(null);
+        return;
+      }
+
+      retries += 1;
+      if (retries >= maxRetries) {
+        setErrorMsg(
+          "No se pudo inicializar el agente. Recarga la página e intenta de nuevo.",
+        );
+        return;
+      }
+      window.setTimeout(checkWidgetApi, 150);
+    };
+
+    if (customElements.get("elevenlabs-convai")) {
+      checkWidgetApi();
+    } else {
+      customElements
+        .whenDefined("elevenlabs-convai")
+        .then(checkWidgetApi)
+        .catch(() =>
+          setErrorMsg("No se cargó el widget de ElevenLabs correctamente."),
+        );
+    }
 
     return () => {
+      cancelled = true;
       node.removeEventListener("conversationStarted", onStarted);
       node.removeEventListener("conversationEnded", onEnded);
     };
-  }, []);
+  }, [scriptLoaded]);
 
   const handleStartCall = () => {
+    setErrorMsg(null);
     const node = widgetRef.current as
       | (HTMLElement & { startConversation?: () => void })
       | null;
-    node?.startConversation?.();
+    if (!node?.startConversation) {
+      setErrorMsg("El agente aún no está listo. Espera 1-2 segundos.");
+      return;
+    }
+    node.startConversation();
   };
 
   const handleEndCall = () => {
     const node = widgetRef.current as
       | (HTMLElement & { endConversation?: () => void })
       | null;
-    node?.endConversation?.();
+    if (!node?.endConversation) return;
+    node.endConversation();
   };
 
   return (
@@ -77,6 +125,10 @@ export function ElevenLabsConvaiSection({
         src={ELEVENLABS_CONVA_WIDGET_SCRIPT}
         strategy="afterInteractive"
         type="text/javascript"
+        onLoad={() => setScriptLoaded(true)}
+        onError={() =>
+          setErrorMsg("No se pudo cargar el script del agente (unpkg).")
+        }
       />
 
       <div
@@ -176,6 +228,11 @@ export function ElevenLabsConvaiSection({
               Agente: {isInCall ? "online" : "idle"}
             </p>
           </div>
+          {errorMsg ? (
+            <p className="mb-3 text-center text-xs font-semibold text-rose-700">
+              {errorMsg}
+            </p>
+          ) : null}
 
           {/* Widget oculto: usamos su API JS y controles propios del landing */}
           <div
