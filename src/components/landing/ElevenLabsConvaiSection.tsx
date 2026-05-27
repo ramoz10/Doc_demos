@@ -130,10 +130,11 @@ export function ElevenLabsConvaiSection({
           <Image
             src={METLIFE_PRYMENET_LOGO}
             alt="PrymeNet — Tecnología trabajando para ti"
-            width={240}
-            height={55}
-            className="h-auto w-[min(100%,240px)] object-contain"
+            width={280}
+            height={64}
+            className="h-auto w-[min(100%,280px)] bg-transparent object-contain"
             priority
+            unoptimized
           />
           <h2
             className="mt-3 text-balance text-lg font-bold leading-snug tracking-tight md:text-xl"
