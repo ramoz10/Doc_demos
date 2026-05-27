@@ -11,8 +11,12 @@ if awk '/<LandingHeader/,/\/>/ { if (/templateId=/) found=1 } END { exit found ?
 else
   echo "OK: LandingHeader sin templateId."
 fi
-if grep -qE 'sticky|fixed|top-0' src/components/landing/LandingHeaderClient.tsx 2>/dev/null; then
-  echo "ERROR: LandingHeaderClient usa sticky/fixed (el header no bajará con el scroll)."
+if grep -qE 'className="[^"]*(sticky|fixed|top-0)|className='\''[^'\'']*(sticky|fixed|top-0)' src/components/landing/LandingHeader.tsx 2>/dev/null; then
+  echo "ERROR: LandingHeader usa clases sticky/fixed (el header no bajará con el scroll)."
   exit 1
 fi
-echo "OK: LandingHeaderClient sin sticky/fixed."
+if [ -f src/components/landing/LandingHeaderClient.tsx ]; then
+  echo "ERROR: LandingHeaderClient.tsx obsoleto; usar LandingHeader.tsx (Server Component)."
+  exit 1
+fi
+echo "OK: LandingHeader sin sticky/fixed."

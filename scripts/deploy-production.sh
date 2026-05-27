@@ -16,8 +16,14 @@ git checkout main
 git pull origin main
 echo "Commit: $(git log -1 --oneline)"
 
-echo "=== Alinear con origin/main (evita page.tsx corrupto en servidor) ==="
-git checkout origin/main -- 'src/app/[clientSlug]/page.tsx'
+echo "=== Alinear landings con origin/main ==="
+git checkout origin/main -- \
+  'src/app/[clientSlug]/page.tsx' \
+  'src/app/[clientSlug]/layout.tsx' \
+  'src/components/landing/LandingHeader.tsx' \
+  'src/components/landing/LandingHeaderScrollGuard.tsx' \
+  'src/app/design-tokens.css'
+rm -f src/components/landing/LandingHeaderClient.tsx
 
 echo "=== Quitar fuentes locales no versionadas en src/ (rompen npm run build) ==="
 untracked_src=$(git ls-files --others --exclude-standard 'src/**/*.tsx' 'src/**/*.ts' 2>/dev/null || true)
@@ -31,8 +37,12 @@ echo "=== Verificar page.tsx antes del build ==="
 bash scripts/verify-build-ready.sh
 
 echo "=== Verificar que el header no use sticky/fixed ==="
-if grep -E 'sticky|fixed|top-0' src/components/landing/LandingHeaderClient.tsx; then
-  echo "ERROR: LandingHeaderClient no debe usar position sticky/fixed."
+if grep -qE 'className="[^"]*(sticky|fixed|top-0)|className='\''[^'\'']*(sticky|fixed|top-0)' src/components/landing/LandingHeader.tsx; then
+  echo "ERROR: LandingHeader no debe usar clases sticky/fixed."
+  exit 1
+fi
+if [ -f src/components/landing/LandingHeaderClient.tsx ]; then
+  echo "ERROR: eliminar LandingHeaderClient.tsx obsoleto (header es Server Component)."
   exit 1
 fi
 echo "OK: header en flujo normal del documento."
