@@ -1,13 +1,10 @@
 "use client";
 
-import { createElement, useEffect, useRef, useState } from "react";
-import Script from "next/script";
+import { useRef, useState } from "react";
 import { Montserrat } from "next/font/google";
 import { User } from "lucide-react";
-import {
-  ELEVENLABS_CONVA_WIDGET_SCRIPT,
-  METLIFE_ELEVENLABS_AGENT_ID,
-} from "@/lib/metlife-bot";
+import { Conversation } from "@elevenlabs/client";
+import { METLIFE_ELEVENLABS_AGENT_ID } from "@/lib/metlife-bot";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -29,130 +26,64 @@ export function ElevenLabsConvaiSection({
   primaryColor,
   secondaryColor,
 }: Props) {
-  const widgetRef = useRef<HTMLElement | null>(null);
+  const conversationRef = useRef<{ endSession?: () => Promise<void> } | null>(null);
   const [isInCall, setIsInCall] = useState(false);
-  const [isReady, setIsReady] = useState(false);
   const [isStartingCall, setIsStartingCall] = useState(false);
+  const [agentStatus, setAgentStatus] = useState<"idle" | "listening" | "speaking">("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [scriptLoaded, setScriptLoaded] = useState(false);
   const brandBlue = primaryColor || "#2d6df6";
   const startGreen = "#2aad57";
   const hangPink = "#e8adbf";
-  const widgetElementId = "metlife-convai-widget-hidden";
-
-  useEffect(() => {
-    const existing = customElements.get("elevenlabs-convai");
-    if (existing) setScriptLoaded(true);
-  }, []);
-
-  useEffect(() => {
-    if (!scriptLoaded) return;
-    const node = (document.getElementById(widgetElementId) ||
-      widgetRef.current) as HTMLElement | null;
-    if (!node) return;
-    widgetRef.current = node;
-
-    const onStarted = () => setIsInCall(true);
-    const onEnded = () => setIsInCall(false);
-
-    node.addEventListener("conversationStarted", onStarted);
-    node.addEventListener("conversationEnded", onEnded);
-
-    let cancelled = false;
-    let retries = 0;
-    const maxRetries = 80;
-    const checkWidgetApi = () => {
-      if (cancelled) return;
-      const widget = widgetRef.current as
-        | (HTMLElement & {
-            startConversation?: () => void;
-            endConversation?: () => void;
-          })
-        | null;
-
-      if (widget && (widget.shadowRoot || customElements.get("elevenlabs-convai"))) {
-        setIsReady(true);
-        setErrorMsg(null);
-        return;
-      }
-
-      retries += 1;
-      if (retries >= maxRetries) {
-        setErrorMsg(
-          "No se pudo inicializar el agente. Recarga la página e intenta de nuevo.",
-        );
-        return;
-      }
-      window.setTimeout(checkWidgetApi, 150);
-    };
-
-    if (customElements.get("elevenlabs-convai")) {
-      checkWidgetApi();
-    } else {
-      customElements
-        .whenDefined("elevenlabs-convai")
-        .then(checkWidgetApi)
-        .catch(() =>
-          setErrorMsg("No se cargó el widget de ElevenLabs correctamente."),
-        );
-    }
-
-    return () => {
-      cancelled = true;
-      node.removeEventListener("conversationStarted", onStarted);
-      node.removeEventListener("conversationEnded", onEnded);
-    };
-  }, [scriptLoaded]);
-
-  const clickWidgetButton = (matcher: (text: string, btn: HTMLButtonElement) => boolean) => {
-    const node = widgetRef.current as HTMLElement | null;
-    const root = node?.shadowRoot;
-    if (!root) return false;
-    const buttons = Array.from(root.querySelectorAll("button")) as HTMLButtonElement[];
-    const target = buttons.find((btn) => matcher((btn.textContent || "").trim().toLowerCase(), btn));
-    if (!target) return false;
-    target.click();
-    return true;
-  };
 
   const handleStartCall = async () => {
     setErrorMsg(null);
+    if (conversationRef.current) return;
     setIsStartingCall(true);
-    const node = widgetRef.current as
-      | (HTMLElement & {
-          startConversation?: () => void;
-          setAttribute: (name: string, value: string) => void;
-        })
-      | null;
-    if (!node?.startConversation) {
-      setErrorMsg("El agente aún no está listo. Espera 1-2 segundos.");
-      setIsStartingCall(false);
-      return;
-    }
     try {
-      const res = await fetch("/api/metlife/signed-url", { method: "GET" });
-      if (!res.ok) {
-        throw new Error("No se pudo obtener el token de conexión.");
-      }
-      const body = (await res.json()) as { signedUrl?: string };
-      if (!body?.signedUrl) {
-        throw new Error("No se recibió signed URL.");
-      }
+      await navigator.mediaDevices.getUserMedia({ audio: true });
 
-      node.setAttribute("signed-url", body.signedUrl);
-      // Preferimos API directa si existe; fallback a click en botón interno del widget.
-      if (typeof node.startConversation === "function") {
-        node.startConversation();
-      } else {
-        const clicked = clickWidgetButton((text) =>
-          text.includes("start call") ||
-          text.includes("iniciar llamada") ||
-          text.includes("begin conversation"),
-        );
-        if (!clicked) {
-          throw new Error("No se encontró el botón interno de inicio del widget.");
-        }
+      const session = await Conversation.startSession({
+        agentId,
+        connectionType: "webrtc",
+        onConnect: () => {
+          setIsInCall(true);
+          setAgentStatus("listening");
+          setErrorMsg(null);
+        },
+        onDisconnect: () => {
+          setIsInCall(false);
+          setAgentStatus("idle");
+          conversationRef.current = null;
+        },
+        onError: (message: unknown) => {
+          const text =
+            typeof message === "string"
+              ? message
+              : "No se pudo iniciar la llamada.";
+          setErrorMsg(text);
+          setIsInCall(false);
+          setAgentStatus("idle");
+          conversationRef.current = null;
+        },
+        onModeChange: (mode: unknown) => {
+          const value =
+            typeof mode === "object" && mode !== null && "mode" in mode
+              ? String((mode as { mode?: string }).mode)
+              : String(mode ?? "idle");
+          if (value === "speaking") {
+            setAgentStatus("speaking");
+          } else if (value === "listening") {
+            setAgentStatus("listening");
+          } else {
+            setAgentStatus("idle");
+          }
+        },
+      });
+
+      if (!session) {
+        throw new Error("No se pudo crear la sesión de conversación.");
       }
+      conversationRef.current = session as { endSession?: () => Promise<void> };
     } catch (error) {
       const msg =
         error instanceof Error
@@ -165,19 +96,16 @@ export function ElevenLabsConvaiSection({
   };
 
   const handleEndCall = () => {
-    const node = widgetRef.current as
-      | (HTMLElement & { endConversation?: () => void })
-      | null;
-    if (!node) return;
-    if (typeof node.endConversation === "function") {
-      node.endConversation();
-      return;
-    }
-    clickWidgetButton((text) =>
-      text.includes("end call") ||
-      text.includes("colgar") ||
-      text.includes("end conversation"),
-    );
+    const session = conversationRef.current;
+    if (!session?.endSession) return;
+    session
+      .endSession()
+      .catch(() => {})
+      .finally(() => {
+        conversationRef.current = null;
+        setIsInCall(false);
+        setAgentStatus("idle");
+      });
   };
 
   return (
@@ -186,16 +114,6 @@ export function ElevenLabsConvaiSection({
       className={`scroll-mt-28 px-4 pb-24 pt-8 md:px-6 ${montserrat.className}`}
       aria-label={title || "Centro de pruebas de Voice Bots"}
     >
-      <Script
-        src={ELEVENLABS_CONVA_WIDGET_SCRIPT}
-        strategy="afterInteractive"
-        type="text/javascript"
-        onLoad={() => setScriptLoaded(true)}
-        onError={() =>
-          setErrorMsg("No se pudo cargar el script del agente (unpkg).")
-        }
-      />
-
       <div
         className="mx-auto max-w-[760px] rounded-[2rem] px-5 py-10 md:px-10 md:py-12"
         style={{
@@ -268,7 +186,7 @@ export function ElevenLabsConvaiSection({
             <button
               type="button"
               onClick={handleStartCall}
-              disabled={!isReady || isInCall || isStartingCall}
+              disabled={isInCall || isStartingCall}
               className="inline-flex h-12 min-w-[170px] items-center justify-center rounded-[12px] px-6 text-sm font-extrabold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
               style={{ backgroundColor: startGreen }}
             >
@@ -277,7 +195,7 @@ export function ElevenLabsConvaiSection({
             <button
               type="button"
               onClick={handleEndCall}
-              disabled={!isReady || !isInCall}
+              disabled={!isInCall}
               className="inline-flex h-12 min-w-[170px] items-center justify-center rounded-[12px] px-6 text-sm font-extrabold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
               style={{ backgroundColor: hangPink }}
             >
@@ -290,7 +208,7 @@ export function ElevenLabsConvaiSection({
               ● Estado: {isInCall ? "En llamada" : "Desconectado"}
             </p>
             <p className="rounded-full bg-slate-100 px-4 py-1 text-xs font-semibold text-slate-700">
-              Agente: {isInCall ? "online" : "idle"}
+              Agente: {isInCall ? agentStatus : "idle"}
             </p>
           </div>
           {errorMsg ? (
@@ -298,20 +216,6 @@ export function ElevenLabsConvaiSection({
               {errorMsg}
             </p>
           ) : null}
-
-          {/* Widget oculto (offscreen): usamos su API JS y controles propios del landing */}
-          <div
-            className="pointer-events-none absolute -left-[9999px] top-auto h-[420px] w-[320px] overflow-hidden opacity-0"
-            aria-hidden
-          >
-            {createElement("elevenlabs-convai", {
-              id: widgetElementId,
-              "agent-id": agentId,
-              ref: (el: Element | null) => {
-                widgetRef.current = el as HTMLElement | null;
-              },
-            })}
-          </div>
         </div>
       </div>
     </section>
