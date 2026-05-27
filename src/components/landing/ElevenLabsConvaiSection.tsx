@@ -1,10 +1,14 @@
 "use client";
 
 import { useRef, useState } from "react";
+import Image from "next/image";
 import { Montserrat } from "next/font/google";
-import { User } from "lucide-react";
 import { Conversation } from "@elevenlabs/client";
-import { METLIFE_ELEVENLABS_AGENT_ID } from "@/lib/metlife-bot";
+import {
+  METLIFE_AGENT_IMAGE,
+  METLIFE_ELEVENLABS_AGENT_ID,
+  METLIFE_PRYMENET_LOGO,
+} from "@/lib/metlife-bot";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -123,27 +127,16 @@ export function ElevenLabsConvaiSection({
       >
         {/* Marca PrymeNet */}
         <header className="mb-6 flex flex-col items-center text-center">
-          <div className="mb-2 flex items-center gap-2">
-            <span
-              className="flex h-11 w-11 items-center justify-center rounded-full text-2xl"
-              style={{
-                backgroundColor: `${brandBlue}18`,
-                color: brandBlue,
-              }}
-              aria-hidden
-            >
-              🐙
-            </span>
-            <span
-              className="text-2xl font-extrabold tracking-tight md:text-[1.65rem]"
-              style={{ color: brandBlue }}
-            >
-              PrymeNet
-            </span>
+          <div className="mb-2 overflow-hidden rounded-xl bg-black px-4 py-3">
+            <Image
+              src={METLIFE_PRYMENET_LOGO}
+              alt="PrymeNet — Tecnología trabajando para ti"
+              width={320}
+              height={74}
+              className="h-auto w-[min(100%,320px)] object-contain"
+              priority
+            />
           </div>
-          <p className="text-xs font-medium text-slate-500 md:text-sm">
-            Tecnología trabajando para ti
-          </p>
           <h2
             className="mt-5 text-balance text-[2.05rem] font-extrabold leading-tight tracking-tight md:text-[3.05rem]"
             style={{ color: secondaryColor }}
@@ -161,16 +154,18 @@ export function ElevenLabsConvaiSection({
           {/* Avatar circular + badge (look PrymeNet) */}
           <div className="relative mx-auto mb-8 flex w-fit flex-col items-center">
             <div
-              className="flex h-44 w-44 items-center justify-center overflow-hidden rounded-full border-2 md:h-52 md:w-52"
+              className="relative h-44 w-44 overflow-hidden rounded-full border-2 md:h-52 md:w-52"
               style={{
                 borderColor: `${brandBlue}55`,
                 background: `linear-gradient(160deg, ${brandBlue}22 0%, #e2e8f0 100%)`,
               }}
             >
-              <User
-                className="h-24 w-24 text-white/90 opacity-90 md:h-28 md:w-28"
-                strokeWidth={1.25}
-                aria-hidden
+              <Image
+                src={METLIFE_AGENT_IMAGE}
+                alt="Agente de atención MetLife"
+                fill
+                className="object-cover object-top"
+                sizes="(max-width: 768px) 176px, 208px"
               />
             </div>
             <span className="absolute bottom-0 left-1/2 z-[1] -translate-x-1/2 translate-y-1/2 whitespace-nowrap rounded-full border border-slate-200/80 bg-white px-3 py-1 text-[11px] font-semibold text-slate-800 shadow-sm md:text-xs">

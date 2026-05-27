@@ -7,7 +7,6 @@ import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { clients, clientBranding } from "../drizzle/schema";
 import { metlifeSegurosGuide } from "../src/content/metlife-seguros-guide";
-import { METLIFE_ELEVENLABS_APP_URL } from "../src/lib/metlife-bot";
 
 const METLIFE_TEMPLATE_ID = "guide-seguros";
 const landingContent = JSON.stringify(metlifeSegurosGuide);
@@ -29,9 +28,8 @@ const branding = {
   heroTitle: "Agente Conversacional MetLife – Caja de compensación Colsubsidio",
   heroSubtitle:
     "Seguro voluntario de accidentes personales. Guía clara, profesional y confiable para que el cliente entienda el producto y tome una decisión informada.",
-  botUrl: (process.env.METLIFE_HEADER_BOT_URL?.trim() ||
-    METLIFE_ELEVENLABS_APP_URL) as string,
-  botButtonText: "Plataforma del Agente",
+  botUrl: null as string | null,
+  botButtonText: null as string | null,
 };
 
 let row = db

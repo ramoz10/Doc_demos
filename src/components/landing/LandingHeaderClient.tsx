@@ -19,6 +19,7 @@ interface LandingHeaderClientProps {
   botButtonText: string | null;
   botUrl2: string | null;
   botButtonText2: string | null;
+  hideBotButtons?: boolean;
 }
 
 export function LandingHeaderClient({
@@ -31,6 +32,7 @@ export function LandingHeaderClient({
   botButtonText,
   botUrl2,
   botButtonText2,
+  hideBotButtons = false,
 }: LandingHeaderClientProps) {
   return (
     <header
@@ -80,7 +82,7 @@ export function LandingHeaderClient({
         </div>
 
         <div className="flex w-full flex-wrap items-center justify-center gap-2 md:w-auto md:justify-end md:gap-3">
-          {botUrl ? (
+          {!hideBotButtons && botUrl ? (
             <Link
               href={botUrl}
               target="_blank"
@@ -90,7 +92,7 @@ export function LandingHeaderClient({
             >
               {botButtonText || "Ir al Bot"}
             </Link>
-          ) : (
+          ) : !hideBotButtons ? (
             !botUrl2 && (
               <span
                 className="rounded-lg px-5 py-2.5 text-sm font-semibold uppercase opacity-60"
@@ -99,9 +101,9 @@ export function LandingHeaderClient({
                 {botButtonText || "Bot (No Url)"}
               </span>
             )
-          )}
+          ) : null}
 
-          {botUrl2 && (
+          {!hideBotButtons && botUrl2 && (
             <Link
               href={botUrl2}
               target="_blank"

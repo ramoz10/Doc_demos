@@ -2,6 +2,12 @@
 export const METLIFE_ELEVENLABS_AGENT_ID =
   "agent_7501kjwm6f17fter0d3886rt38x0";
 
+/** Retrato del agente en la tarjeta de voz (public/metlife). */
+export const METLIFE_AGENT_IMAGE = "/metlife/agent.png";
+
+/** Logo PrymeNet en el encabezado del centro de pruebas (public/metlife). */
+export const METLIFE_PRYMENET_LOGO = "/metlife/prymenet-logo.png";
+
 /** Script oficial del widget (embed en la landing, sin iframe). */
 export const ELEVENLABS_CONVA_WIDGET_SCRIPT =
   "https://unpkg.com/@elevenlabs/convai-widget-embed";

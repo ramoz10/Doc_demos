@@ -11,6 +11,8 @@ interface LandingHeaderProps {
   botButtonText: string | null;
   botUrl2: string | null;
   botButtonText2: string | null;
+  /** Oculta botones del bot en el header (p. ej. MetLife con ConvAI en página). */
+  hideBotButtons?: boolean;
   /** Ignorado: el template solo usa LandingRenderer. Evita fallos de build si page.tsx lo pasa por error. */
   templateId?: string;
 }
@@ -25,6 +27,7 @@ export function LandingHeader({
   botButtonText,
   botUrl2,
   botButtonText2,
+  hideBotButtons,
   templateId: _templateId,
 }: LandingHeaderProps) {
   return (
@@ -38,6 +41,7 @@ export function LandingHeader({
       botButtonText={botButtonText}
       botUrl2={botUrl2}
       botButtonText2={botButtonText2}
+      hideBotButtons={hideBotButtons}
     />
   );
 }
